@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: photos-nfs-pv
+  namespace: immich
+spec:
+  capacity:
+    storage: 250Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/Photos
+    server: 192.168.86.246
+  storageClassName: immich-photos
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: photos-nfs-pvc
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 250Gi
+  volumeName: photos-nfs-pv
+  storageClassName: immich-photos
+
