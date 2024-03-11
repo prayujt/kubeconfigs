@@ -57,4 +57,24 @@ spec:
         - name: prayujt-website-temp-volume
           configMap:
             name: prayujt-website
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - name: nginx-http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30000
+    - name: nginx-ssl
+      protocol: TCP
+      port: 443
+      targetPort: 443
+      nodePort: 30001
+  type: NodePort
 
