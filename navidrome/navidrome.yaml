@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: navidrome
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: navidrome
+  namespace: navidrome
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: navidrome
+  template:
+    metadata:
+      labels:
+        app: navidrome
+    spec:
+      containers:
+      - name: navidrome
+        image: deluan/navidrome:latest
+        ports:
+        - containerPort: 4533
+        env:
+        - name: ND_SCANSCHEDULE
+          value: "1h"
+        - name: ND_LOGLEVEL
+          value: "info"
+        - name: ND_SESSIONTIMEOUT
+          value: "24h"
+        - name: ND_BASEURL
+          value: ""
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: music
+          mountPath: /music
+          readOnly: true
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: music-data-nfs-pvc
+      - name: music
+        persistentVolumeClaim:
+          claimName: music-nfs-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: navidrome-service
+  namespace: navidrome
+spec:
+  selector:
+    app: navidrome
+  ports:
+  - protocol: TCP
+    port: 4533
+    targetPort: 4533
