@@ -1,6 +1,6 @@
-kubectl delete configmap nginx-config
-kubectl delete configmap nginx-certs
-kubectl delete configmap prayujt-website
+kubectl delete configmap nginx-config -n nginx
+kubectl delete configmap nginx-certs -n nginx
+kubectl delete configmap prayujt-website -n nginx
 
 rm *.tar.gz
 tar -czvf nginx-config.tar.gz --directory=/etc/nginx .
