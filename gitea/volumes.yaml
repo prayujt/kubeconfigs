@@ -16,6 +16,7 @@ spec:
   nfs:
     path: /home/files/.gitea
     server: 192.168.86.100
+  storageClassName: gitea-nfs
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -34,4 +35,5 @@ spec:
   resources:
     requests:
       storage: 10Gi
+  storageClassName: gitea-nfs
 
