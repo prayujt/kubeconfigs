@@ -39,7 +39,7 @@ spec:
               mountPath: /var/www/temp
       containers:
         - name: nginx-container
-          image: nginx
+          image: ubuntu/nginx
           volumeMounts:
             - name: nginx-config-volume
               mountPath: /etc/nginx
@@ -83,5 +83,10 @@ spec:
       port: 443
       targetPort: 443
       nodePort: 30001
+    - name: nginx-ssh
+      protocol: TCP
+      port: 22
+      targetPort: 22
+      nodePort: 30002
   type: NodePort
 
