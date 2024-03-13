@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: syncthing
+  namespace: syncthing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: syncthing
+  template:
+    metadata:
+      labels:
+        app: syncthing
+    spec:
+      containers:
+        - name: syncthing
+          image: syncthing/syncthing
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+          ports:
+            - containerPort: 8384 # Web UI
+            - containerPort: 22000 # TCP file transfers
+            - containerPort: 22001 # QUIC file transfers
+            - containerPort: 21027 # Receive local discovery broadcasts
+          volumeMounts:
+            - name: syncthing-storage
+              mountPath: /var/syncthing
+      volumes:
+        - name: syncthing-storage
+          persistentVolumeClaim:
+            claimName: syncthing-nfs-pvc
+  selector:
+    matchLabels:
+      app: syncthing
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: syncthing
+  namespace: syncthing
+spec:
+  selector:
+    app: syncthing
+  ports:
+    - name: web-ui
+      port: 8384
+      targetPort: 8384
+      protocol: TCP
+    - name: tcp-file-transfers
+      port: 22000
+      targetPort: 22000
+      protocol: TCP
+      nodePort: 32000
+    - name: quic-file-transfers
+      port: 22001
+      targetPort: 22001
+      protocol: UDP
+      nodePort: 32001
+    - name: local-discovery-broadcasts
+      port: 21027
+      targetPort: 21027
+      protocol: UDP
+      nodePort: 32002
+  type: NodePort
+
