@@ -1,0 +1,157 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: affine
+  namespace: affine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: affine
+  template:
+    metadata:
+      labels:
+        app: affine
+    spec:
+      containers:
+      - name: affine
+        image: ghcr.io/toeverything/affine-graphql:stable
+        command: ["sh", "-c", "node ./scripts/self-host-predeploy && node ./dist/index.js"]
+        ports:
+        - containerPort: 3010
+        - containerPort: 5555
+        volumeMounts:
+        - name: config-volume
+          mountPath: /root/.affine/config
+        - name: storage-volume
+          mountPath: /root/.affine/storage
+        env:
+        - name: NODE_OPTIONS
+          value: "--import=./scripts/register.js"
+        - name: AFFINE_CONFIG_PATH
+          value: /root/.affine/config
+        - name: REDIS_SERVER_HOST
+          value: affine-redis.affine.svc.cluster.local
+        - name: DATABASE_URL
+          value: postgres://affine:affine@affine-postgres.affine.svc.cluster.local:5432/affine
+        - name: NODE_ENV
+          value: production
+        - name: AFFINE_ADMIN_EMAIL
+          value: ${AFFINE_ADMIN_EMAIL}
+        - name: AFFINE_ADMIN_PASSWORD
+          value: ${AFFINE_ADMIN_PASSWORD}
+      volumes:
+      - name: config-volume
+        persistentVolumeClaim:
+          claimName: affine-config
+      - name: storage-volume
+        persistentVolumeClaim:
+          claimName: affine-storage
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: affine
+  namespace: affine
+spec:
+  selector:
+    app: affine
+  ports:
+  - name: port-3010
+    protocol: TCP
+    port: 3010
+    targetPort: 3010
+  - name: port-5555
+    protocol: TCP
+    port: 5555
+    targetPort: 5555
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: affine-redis
+  namespace: affine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: affine-redis
+  template:
+    metadata:
+      labels:
+        app: affine-redis
+    spec:
+      containers:
+      - name: affine-redis
+        image: redis
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: affine-redis
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: affine-redis
+  namespace: affine
+spec:
+  selector:
+    app: affine-redis
+  ports:
+  - protocol: TCP
+    port: 6379
+    targetPort: 6379
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: affine-postgres
+  namespace: affine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: affine-postgres
+  template:
+    metadata:
+      labels:
+        app: affine-postgres
+    spec:
+      containers:
+      - name: affine-postgres
+        image: postgres
+        env:
+        - name: POSTGRES_USER
+          value: affine
+        - name: POSTGRES_PASSWORD
+          value: affine
+        - name: POSTGRES_DB
+          value: affine
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: affine-postgres
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: affine-postgres
+  namespace: affine
+spec:
+  selector:
+    app: affine-postgres
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+
