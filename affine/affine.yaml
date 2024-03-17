@@ -30,6 +30,8 @@ spec:
           value: "--import=./scripts/register.js"
         - name: AFFINE_CONFIG_PATH
           value: /root/.affine/config
+        - name: AFFINE_SERVER_HTTPS
+          value: "true"
         - name: REDIS_SERVER_HOST
           value: affine-redis.affine.svc.cluster.local
         - name: DATABASE_URL
@@ -138,6 +140,9 @@ spec:
           value: affine
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
       volumes:
       - name: postgres-data
         persistentVolumeClaim:
