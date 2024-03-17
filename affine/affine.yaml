@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: affine
-        image: ghcr.io/toeverything/affine-graphql:stable
+        image: ghcr.io/toeverything/affine-graphql:stable-cd56d8a
         command: ["sh", "-c", "node ./scripts/self-host-predeploy && node ./dist/index.js"]
         ports:
         - containerPort: 3010
@@ -37,9 +37,15 @@ spec:
         - name: NODE_ENV
           value: production
         - name: AFFINE_ADMIN_EMAIL
-          value: ${AFFINE_ADMIN_EMAIL}
+          valueFrom:
+            secretKeyRef:
+              name: affine-admin-secret
+              key: email
         - name: AFFINE_ADMIN_PASSWORD
-          value: ${AFFINE_ADMIN_PASSWORD}
+          valueFrom:
+            secretKeyRef:
+              name: affine-admin-secret
+              key: password
       volumes:
       - name: config-volume
         persistentVolumeClaim:
@@ -47,7 +53,6 @@ spec:
       - name: storage-volume
         persistentVolumeClaim:
           claimName: affine-storage
-
 ---
 apiVersion: v1
 kind: Service
@@ -66,7 +71,6 @@ spec:
     protocol: TCP
     port: 5555
     targetPort: 5555
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -93,7 +97,6 @@ spec:
       - name: redis-data
         persistentVolumeClaim:
           claimName: affine-redis
-
 ---
 apiVersion: v1
 kind: Service
@@ -107,7 +110,6 @@ spec:
   - protocol: TCP
     port: 6379
     targetPort: 6379
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -140,7 +142,6 @@ spec:
       - name: postgres-data
         persistentVolumeClaim:
           claimName: affine-postgres
-
 ---
 apiVersion: v1
 kind: Service
