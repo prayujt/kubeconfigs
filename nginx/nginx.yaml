@@ -44,6 +44,8 @@ spec:
               mountPath: /etc/letsencrypt
             - name: prayujt-website-volume
               mountPath: /var/www/prayujt.com
+            - name: prayujt-resume-volume
+              mountPath: /var/www/prayujt.com/resume
       volumes:
         - name: nginx-config-volume
           emptyDir: {}
@@ -60,6 +62,10 @@ spec:
         - name: prayujt-website-temp-volume
           configMap:
             name: prayujt-website
+        - name: prayujt-resume-volume
+          persistentVolumeClaim:
+            claimName: prayujt-resume
+
 ---
 apiVersion: v1
 kind: Service

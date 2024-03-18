@@ -11,3 +11,6 @@ kubectl create configmap nginx-config -n nginx --from-file=nginx-config.tar.gz
 kubectl create configmap nginx-certs -n nginx --from-file=nginx-certs.tar.gz
 kubectl create configmap prayujt-website -n nginx --from-file=prayujt-website.tar.gz
 
+kubectl delete -f nginx.yaml
+sleep 1
+kubectl apply -f nginx.yaml

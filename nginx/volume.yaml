@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: prayujt-nfs-resume
+  namespace: nginx
+spec:
+  capacity:
+    storage: 2Mi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/Sync/Documents/Resume
+    server: 192.168.86.100
+  storageClassName: prayujt-resume
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prayujt-resume
+  namespace: nginx
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Mi
+  volumeName: prayujt-nfs-resume
+  storageClassName: prayujt-resume
