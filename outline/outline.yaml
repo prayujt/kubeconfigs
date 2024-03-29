@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: outline
+  namespace: outline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: outline
+  template:
+    metadata:
+      labels:
+        app: outline
+    spec:
+      containers:
+      - name: outline
+        image: docker.getoutline.com/outlinewiki/outline:latest
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: outline-env
+        volumeMounts:
+        - name: storage-data
+          mountPath: /var/lib/outline/data
+      volumes:
+      - name: storage-data
+        persistentVolumeClaim:
+          claimName: outline-storage
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: outline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis
+        command: ["redis-server", "/redis.conf"]
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - name: redis-data
+          mountPath: /redis.conf
+          subPath: redis.conf
+      volumes:
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: outline-redis
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: outline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres
+        ports:
+        - containerPort: 5432
+        env:
+          - name: POSTGRES_USER
+            value: "user"
+          - name: POSTGRES_PASSWORD
+            value: "pass"
+          - name: POSTGRES_DB
+            value: "outline"
+        volumeMounts:
+        - name: database-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: database-data
+        persistentVolumeClaim:
+          claimName: outline-postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: outline
+  namespace: outline
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+  selector:
+    app: outline
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: outline
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: outline
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

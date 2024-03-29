@@ -1,2 +1,4 @@
 *.tar.gz
 **/secrets.yaml
+**/docker-data
+**/configmap.yaml
