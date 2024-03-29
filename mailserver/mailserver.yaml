@@ -38,6 +38,8 @@ spec:
           value: "mail.prayujt.com"
         - name: PERMIT_DOCKER
           value: "connected-networks"
+        - name: TLS_LEVEL
+          value: "intermediate"
         volumeMounts:
         - name: mail-data
           mountPath: "/var/mail/"
