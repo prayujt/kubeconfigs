@@ -53,6 +53,31 @@ spec:
             secretKeyRef:
               name: affine-admin-secret
               key: password
+        - name: MAILER_HOST
+          valueFrom:
+            secretKeyRef:
+              name: affine-mailer-secret
+              key: host
+        - name: MAILER_PORT
+          valueFrom:
+            secretKeyRef:
+              name: affine-mailer-secret
+              key: port
+        - name: MAILER_USER
+          valueFrom:
+            secretKeyRef:
+              name: affine-mailer-secret
+              key: email
+        - name: MAILER_SENDER
+          valueFrom:
+            secretKeyRef:
+              name: affine-mailer-secret
+              key: sender
+        - name: MAILER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: affine-mailer-secret
+              key: password
       volumes:
       - name: config-volume
         persistentVolumeClaim:
