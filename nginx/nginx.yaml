@@ -17,6 +17,11 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: "server-master"
+      tolerations:
+        - key: "master"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
       initContainers:
         - name: extract-nginx
           image: alpine

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wireguard
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wireguard
+  template:
+    metadata:
+      labels:
+        app: wireguard
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: "server-master"
+      containers:
+      - name: wireguard
+        image: lscr.io/linuxserver/wireguard:latest
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN", "SYS_MODULE"]
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZ
+          value: "Etc/UTC"
+        - name: SERVERURL
+          value: "vpn.prayujt.com"
+        - name: SERVERPORT
+          value: "51820"
+        - name: PEERS
+          value: "1"
+        - name: PEERDNS
+          value: "auto"
+        - name: INTERNAL_SUBNET
+          value: "10.13.13.0"
+        - name: ALLOWEDIPS
+          value: "0.0.0.0/0"
+        - name: PERSISTENTKEEPALIVE_PEERS
+          value: ""
+        - name: LOG_CONFS
+          value: "true"
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: lib-modules
+          mountPath: /lib/modules
+        ports:
+        - containerPort: 51820
+          protocol: UDP
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: wireguard-config
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+          type: Directory
