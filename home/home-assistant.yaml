@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homeassistant
+spec:
+  selector:
+    matchLabels:
+      app: homeassistant
+  template:
+    metadata:
+      labels:
+        app: homeassistant
+    spec:
+      hostNetwork: true
+      containers:
+      - name: homeassistant
+        image: ghcr.io/home-assistant/home-assistant:stable
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: dbus
+          mountPath: /run/dbus
+          readOnly: true
+        securityContext:
+          privileged: true
+      volumes:
+      - name: config
+        hostPath:
+          path: /home/prayuj/home-config
+          # Ensure this path exists on your Kubernetes node(s)
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+          # This path usually exists on all Linux systems
+      - name: dbus
+        hostPath:
+          path: /run/dbus
+          # Ensure this path exists on your Kubernetes node(s)
+      restartPolicy: Always
+

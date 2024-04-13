@@ -15,10 +15,11 @@ env:
 controller:
   enabled: true
   type: deployment
-  replicas: 1
+  replicas: 2
 
 image:
   tag: v1.98.1
+    #tag: latest
 
 immich:
   persistence:
