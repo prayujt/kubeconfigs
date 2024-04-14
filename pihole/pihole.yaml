@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  namespace: pihole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: "server-worker2"
+          #hostNetwork: true
+      containers:
+      - name: pihole
+        image: pihole/pihole:latest
+        ports:
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        - containerPort: 53
+          name: dns-udp
+          protocol: UDP
+        - containerPort: 67
+          name: dhcp
+          protocol: UDP
+        - containerPort: 80
+          name: web
+          protocol: TCP
+        env:
+        - name: TZ
+          value: "America/New_York"
+        - name: WEBPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pihole-web-password
+              key: password
+        volumeMounts:
+        - name: etc-pihole
+          mountPath: /etc/pihole
+        - name: etc-dnsmasq
+          mountPath: /etc/dnsmasq.d
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN"]
+      volumes:
+      - name: etc-pihole
+        persistentVolumeClaim:
+          claimName: pihole-config-pvc
+      - name: etc-dnsmasq
+        persistentVolumeClaim:
+          claimName: pihole-dnsmasq-pvc
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-nodeports
+  namespace: pihole
+spec:
+  type: NodePort
+  selector:
+    app: pihole
+  ports:
+    - name: dns-tcp
+      port: 53
+      targetPort: 53
+      protocol: TCP
+      nodePort: 53
+    - name: dns-udp
+      port: 53
+      targetPort: 53
+      protocol: UDP
+      nodePort: 53
+    - name: dhcp
+      port: 67
+      targetPort: 67
+      protocol: UDP
+      nodePort: 67
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole-web
+  namespace: pihole
+spec:
+  type: ClusterIP
+  selector:
+    app: pihole
+  ports:
+    - name: web
+      port: 80
+      targetPort: 80
+      protocol: TCP
+
+        
