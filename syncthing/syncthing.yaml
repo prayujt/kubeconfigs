@@ -54,16 +54,16 @@ spec:
       port: 22000
       targetPort: 22000
       protocol: TCP
-      nodePort: 32000
+      nodePort: 22000
     - name: quic-file-transfers
       port: 22001
       targetPort: 22001
       protocol: UDP
-      nodePort: 32001
+      nodePort: 22001
     - name: local-discovery-broadcasts
       port: 21027
       targetPort: 21027
       protocol: UDP
-      nodePort: 32002
+      nodePort: 21027
   type: NodePort
 

@@ -96,24 +96,24 @@ spec:
       protocol: TCP
       port: 25
       targetPort: 25
-      nodePort: 31000
+      nodePort: 25
     - name: imap
       protocol: TCP
       port: 143
       targetPort: 143
-      nodePort: 31001
+      nodePort: 143
     - name: esmtp-implicit-tls
       protocol: TCP
       port: 465
       targetPort: 465
-      nodePort: 31002
+      nodePort: 465
     - name: esmtp-explicit-tls
       protocol: TCP
       port: 587
       targetPort: 587
-      nodePort: 31003
+      nodePort: 587
     - name: imap4-implicit-tls
       protocol: TCP
       port: 993
       targetPort: 993
-      nodePort: 31004
+      nodePort: 993

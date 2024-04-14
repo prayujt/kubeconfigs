@@ -85,16 +85,16 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
-      nodePort: 30000
+      nodePort: 80
     - name: nginx-ssl
       protocol: TCP
       port: 443
       targetPort: 443
-      nodePort: 30001
+      nodePort: 443
     - name: nginx-ssh
       protocol: TCP
       port: 22
       targetPort: 22
-      nodePort: 30002
+      nodePort: 22
   type: NodePort
 
