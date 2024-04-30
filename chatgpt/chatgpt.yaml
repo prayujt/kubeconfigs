@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatgpt-deployment
+  namespace: chatgpt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatgpt
+  template:
+    metadata:
+      labels:
+        app: chatgpt
+    spec:
+      containers:
+      - name: chatgpt
+        image: pawanosman/chatgpt:latest
+        ports:
+        - containerPort: 3040
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chatgpt-service
+  namespace: chatgpt
+spec:
+  type: ClusterIP
+  selector:
+    app: chatgpt
+  ports:
+  - protocol: TCP
+    port: 3040
+    targetPort: 3040

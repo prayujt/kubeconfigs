@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: subsonic-streaming
+  namespace: subsonic-streaming
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: subsonic-streaming
+  template:
+    metadata:
+      labels:
+        app: subsonic-streaming
+    spec:
+      containers:
+      - name: subsonic-streaming
+        image: localhost:5000/prayujt/subsonic-streaming
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - secretRef:
+            name: subsonic-streaming-secrets
+        volumeMounts:
+        - name: subsonic-streaming-music
+          mountPath: /music
+      volumes:
+      - name: subsonic-streaming-music
+        persistentVolumeClaim:
+          claimName: subsonic-streaming-music
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: subsonic-streaming
+  namespace: subsonic-streaming
+spec:
+  type: ClusterIP
+  selector:
+    app: subsonic-streaming
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 5000
+
