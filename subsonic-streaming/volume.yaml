@@ -7,7 +7,8 @@ spec:
   capacity:
     storage: 50Gi
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
   nfs:
     path: /home/files/Music
     server: 192.168.86.100
@@ -20,7 +21,7 @@ metadata:
   namespace: subsonic-streaming
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: 50Gi
