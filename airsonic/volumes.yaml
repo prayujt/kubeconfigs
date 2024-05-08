@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airsonic-music-pv
+  namespace: airsonic
+spec:
+  capacity:
+    storage: 150Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/Music
+    server: 192.168.86.100
+  storageClassName: airsonic-music
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airsonic-music-pvc
+  namespace: airsonic
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 150Gi
+  volumeName: airsonic-music-pv
+  storageClassName: airsonic-music
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airsonic-data-pv
+  namespace: airsonic
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/.airsonic/data
+    server: 192.168.86.100
+  storageClassName: airsonic-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airsonic-data-pvc
+  namespace: airsonic
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: airsonic-data-pv
+  storageClassName: airsonic-data
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airsonic-podcasts-pv
+  namespace: airsonic
+spec:
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/Podcasts
+    server: 192.168.86.100
+  storageClassName: airsonic-podcasts
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airsonic-podcasts-pvc
+  namespace: airsonic
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: airsonic-podcasts-pv
+  storageClassName: airsonic-podcasts
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airsonic-playlists-pv
+  namespace: airsonic
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/.airsonic/playlists
+    server: 192.168.86.100
+  storageClassName: airsonic-playlists
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airsonic-playlists-pvc
+  namespace: airsonic
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: airsonic-playlists-pv
+  storageClassName: airsonic-playlists

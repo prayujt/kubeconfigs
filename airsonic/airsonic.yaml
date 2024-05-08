@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airsonic
+  namespace: airsonic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airsonic
+  template:
+    metadata:
+      labels:
+        app: airsonic
+    spec:
+      containers:
+      - name: airsonic
+        image: airsonicadvanced/airsonic-advanced:latest
+        ports:
+        - containerPort: 4040
+        env:
+        - name: TZ
+          value: "America/New_York"
+        - name: JAVA_OPTS
+          value: "-Dserver.forward-headers-strategy=native"
+        - name: AIRSONIC_PORT
+          value: "4040"
+        volumeMounts:
+        - name: playlists
+          mountPath: /var/playlists
+        - name: podcasts
+          mountPath: /var/podcasts
+        - name: data
+          mountPath: /var/airsonic
+        - name: music
+          mountPath: /var/music
+        securityContext:
+          runAsUser: 0
+          runAsGroup: 0
+      volumes:
+      - name: playlists
+        persistentVolumeClaim:
+          claimName: airsonic-playlists-pvc
+      - name: podcasts
+        persistentVolumeClaim:
+          claimName: airsonic-podcasts-pvc
+      - name: data
+        persistentVolumeClaim:
+          claimName: airsonic-data-pvc
+      - name: music
+        persistentVolumeClaim:
+          claimName: airsonic-music-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: airsonic
+  namespace: airsonic
+spec:
+  selector:
+    app: airsonic
+  ports:
+  - protocol: TCP
+    port: 4040
+    targetPort: 4040
