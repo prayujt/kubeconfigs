@@ -27,6 +27,33 @@ spec:
           value: "24h"
         - name: ND_BASEURL
           value: ""
+        - name: ND_CONFIGFILE
+          value: "/data/navidrome.toml"
+        - name: ND_LASTFM_APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: navidrome-env
+              key: LASTFM_API_KEY
+        - name: ND_LASTFM_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: navidrome-env
+              key: LASTFM_SECRET
+        - name: ND_SPOTIFY_ID
+          valueFrom:
+            secretKeyRef:
+              name: navidrome-env
+              key: SPOTIFY_CLIENT_ID
+        - name: ND_SPOTIFY_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: navidrome-env
+              key: SPOTIFY_SECRET
+        - name: ND_ENABLESHARING
+          valueFrom:
+            secretKeyRef:
+              name: navidrome-env
+              key: ENABLE_SHARING
         volumeMounts:
         - name: data
           mountPath: /data
