@@ -6,11 +6,11 @@ const CLIENT_ID = process.env.CLIENT_ID || 'your-client-id';
 const REDIRECT_URI = process.env.REDIRECT_URI || 'https://your-app.com/callback';
 
 export const POST: RequestHandler = async ({ request }) => {
-    const { email, password } = await request.json();
+    const { email, password, loginChallenge } = await request.json();
 
     try {
         // Validate credentials (for simplicity, using hardcoded values)
-        if (email !== "foo@bar.com" || password !== "foobar") {
+        if (email !== "prayujtuli@hotmail.com" || password !== "testing") {
             return new Response(
                 JSON.stringify({ error: "The username / password combination is not correct" }),
                 { status: 401, headers: { 'Content-Type': 'application/json' } }
@@ -18,7 +18,6 @@ export const POST: RequestHandler = async ({ request }) => {
         }
 
         // Fetch the login request
-        const loginChallenge = new URL(request.url).searchParams.get('login_challenge');
         const { data: loginRequest } = await axios.get(`${HYDRA_ADMIN_URL}/oauth2/auth/requests/login?login_challenge=${loginChallenge}`);
 
         if (loginRequest.skip) {
@@ -44,7 +43,7 @@ export const POST: RequestHandler = async ({ request }) => {
         );
     } catch (error) {
         return new Response(
-            JSON.stringify({ message: 'Unauthorized' }),
+            JSON.stringify({ message: `Unauthorized: ${error.message}` }),
             { status: 401, headers: { 'Content-Type': 'application/json' } }
         );
     }

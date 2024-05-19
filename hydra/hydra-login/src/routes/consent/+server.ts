@@ -3,6 +3,23 @@ import axios from 'axios';
 
 const HYDRA_ADMIN_URL = process.env.HYDRA_ADMIN_URL || 'https://auth.prayujt.com/admin';
 
+export const GET: RequestHandler = async ({ url }) => {
+    const consent_challenge = url.searchParams.get('consent_challenge');
+
+    try {
+        const { data: consentRequest } = await axios.get(`${HYDRA_ADMIN_URL}/oauth2/auth/requests/consent?consent_challenge=${consent_challenge}`);
+        return new Response(
+            JSON.stringify({ scopes: consentRequest.requested_scope }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+    } catch (error) {
+        return new Response(
+            JSON.stringify({ message: 'Error fetching consent request' }),
+            { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+    }
+};
+
 export const POST: RequestHandler = async ({ request }) => {
     const { consent_challenge, grant_scope, remember } = await request.json();
 
