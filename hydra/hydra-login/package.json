@@ -24,6 +24,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@sveltejs/adapter-node": "^5.0.1",
 		"axios": "^1.6.8"
 	}
 }
