@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hydra-postgres-pv
+  namespace: hydra
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/.hydra
+    server: 192.168.86.100
+  storageClassName: hydra-postgres
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hydra-postgres-pvc
+  namespace: hydra
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: hydra-postgres-pv
+  storageClassName: hydra-postgres
