@@ -2,7 +2,7 @@ import type { RequestHandler } from "@sveltejs/kit";
 import axios from "axios";
 
 const HYDRA_ADMIN_URL =
-  process.env.HYDRA_ADMIN_URL || "https://auth.prayujt.com/admin";
+  process.env.HYDRA_ADMIN_URL || "https://auth.prayujt.com/public/admin";
 const CLIENT_ID = process.env.CLIENT_ID || "your-client-id";
 const REDIRECT_URI =
   process.env.REDIRECT_URI || "https://your-app.com/callback";
@@ -28,7 +28,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     if (loginRequest.skip) {
       const { data: body } = await axios.put(
-        `${HYDRA_ADMIN_URL}/oauth2/auth/requests/login/accept?login_challenge=${loginChallenge}`,
+      	`${HYDRA_ADMIN_URL}/oauth2/auth/requests/login/accept?login_challenge=${loginChallenge}`,
         {
           subject: String(loginRequest.subject),
         },

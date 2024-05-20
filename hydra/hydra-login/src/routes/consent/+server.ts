@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import axios from 'axios';
 
-const HYDRA_ADMIN_URL = process.env.HYDRA_ADMIN_URL || 'https://auth.prayujt.com/admin';
+const HYDRA_ADMIN_URL = process.env.HYDRA_ADMIN_URL || 'https://auth.prayujt.com/public/admin';
 
 export const GET: RequestHandler = async ({ url }) => {
     const consent_challenge = url.searchParams.get('consent_challenge');

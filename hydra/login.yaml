@@ -20,11 +20,11 @@ spec:
         - containerPort: 3000
         env:
         - name: HYDRA_ADMIN_URL
-          value: "https://auth.prayujt.com/admin/"
+          value: "https://auth.prayujt.com/public/admin"
         - name: CLIENT_ID
-          value: "a1f596ea-5971-4129-83d5-6cf5d5a14dd0"
+          value: "2cfbd41a-9b59-441a-9e4b-d1bf05db830b"
         - name: CLIENT_SECRET
-          value: "3pgJ9WG6nGNLm8x4x~ZrQTHz1m"
+          value: "8vOP37.s_xppZhZoEKm6pmFarM"
         - name: REDIRECT_URI
           value: "https://docs.prayujt.com/auth/oidc.callback"
 ---
