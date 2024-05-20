@@ -34,10 +34,10 @@ export const POST: RequestHandler = async ({ request }) => {
           subject: String(loginRequest.subject),
         },
       );
-      return redirect(302, decodeURIComponent(body.redirect_to));
+      redirect(302, body.redirect_to);
       //return new Response(JSON.stringify({ redirect_to: body.redirect_to }), {
-        //status: 200,
-        //headers: { "Content-Type": "application/json" },
+      //status: 200,
+      //headers: { "Content-Type": "application/json" },
       //});
     }
 
@@ -51,8 +51,9 @@ export const POST: RequestHandler = async ({ request }) => {
       },
     );
 
-    return redirect(302, decodeURIComponent(body.redirect_to));
+    redirect(302, body.redirect_to);
   } catch (error) {
+    console.log(error);
     return new Response(
       JSON.stringify({ message: `Unauthorized: ${error.message}` }),
       {

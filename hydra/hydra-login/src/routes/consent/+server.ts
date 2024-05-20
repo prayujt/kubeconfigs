@@ -45,11 +45,7 @@ export const POST: RequestHandler = async ({ request }) => {
         },
       );
 
-      return redirect(302, decodeURIComponent(body.redirect_to));
-      //return new Response(JSON.stringify({ redirect_to: body.redirect_to }), {
-       // status: 200,
-        //headers: { "Content-Type": "application/json" },
-      //});
+      redirect(302, body.redirect_to);
     }
 
     const { data: body } = await axios.put(
@@ -64,11 +60,7 @@ export const POST: RequestHandler = async ({ request }) => {
       },
     );
 
-    return redirect(302, decodeURIComponent(body.redirect_to));
-    // return new Response(
-    //     JSON.stringify({ redirect_to: body.redirect_to }),
-    //     { status: 200, headers: { 'Content-Type': 'application/json' } }
-    // );
+    redirect(302, body.redirect_to);
   } catch (error) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), {
       status: 401,

@@ -15,16 +15,16 @@
     const handleLogin = async () => {
         isLoading = true;
         try {
-            const res = await fetch('/login', {
-                method: 'POST',
+            const res = await fetch("/login", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({ email, password, loginChallenge }),
             });
 
             if (!res.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error("Network response was not ok");
             }
 
             const {
@@ -40,7 +40,7 @@
                 name: `${firstName} ${lastName}`,
             });
 
-	    if (res.status === 302) window.location.href = res.headers.location;
+            if (res.status === 302) goto(res.headers.location);
         } catch (e: any) {
             console.log("Incorrect login");
         } finally {
