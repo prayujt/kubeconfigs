@@ -23,12 +23,12 @@
             body: JSON.stringify({ consent_challenge: challenge, grant_scope: scopes, remember: grant }),
         });
 
-        if (res.ok) {
-            const { redirect_to } = await res.json();
-            window.location.href = redirect_to;
-        } else {
-            console.log("Consent failed");
-        }
+        // if (res.ok) {
+        //     const { redirect_to } = await res.json();
+        //     window.location.href = redirect_to;
+        // } else {
+        //     console.log("Consent failed");
+        // }
     };
 </script>
 
