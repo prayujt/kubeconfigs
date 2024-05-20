@@ -32,7 +32,10 @@ export const POST: RequestHandler = async ({ request }) => {
         subject: String(loginRequest.subject),
       },
     );
-    redirect(302, body.redirect_to);
+    return new Response(
+	JSON.stringify({redirect_to: body.redirect_to}),
+	{ status: 200, headers: { "Content-Type": "application/json" } },
+    );
   }
 
   // Accept the login request
@@ -45,5 +48,8 @@ export const POST: RequestHandler = async ({ request }) => {
     },
   );
 
-  redirect(302, body.redirect_to);
+  return new Response(
+	JSON.stringify({redirect_to: body.redirect_to}),
+	{ status: 200, headers: { "Content-Type": "application/json" } },
+  );
 };

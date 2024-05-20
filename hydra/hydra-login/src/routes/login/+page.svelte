@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
+    //import { goto } from "$app/navigation";
     import { page } from "$app/stores";
     import { user, token } from "$lib/stores";
 
@@ -27,6 +27,7 @@
                 throw new Error("Network response was not ok");
             }
 
+		/**
             const {
                 token: responseToken,
                 email: responseEmail,
@@ -39,8 +40,9 @@
                 email: responseEmail,
                 name: `${firstName} ${lastName}`,
             });
+		**/
 
-            if (res.status === 302) goto(res.headers.location);
+            if (res.status === 200) window.location.href = res.body.redirect_to;
         } catch (e: any) {
             console.log("Incorrect login");
         } finally {

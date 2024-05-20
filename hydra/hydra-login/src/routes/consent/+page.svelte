@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { goto } from "$app/navigation";
+    //import { goto } from "$app/navigation";
 
     let challenge = "";
     let scopes = [];
@@ -26,7 +26,7 @@
             }),
         });
 
-        if (res.status === 302) goto(res.headers.location);
+        if (res.status === 200) window.location.href = res.body.redirect_to;
     };
 </script>
 
