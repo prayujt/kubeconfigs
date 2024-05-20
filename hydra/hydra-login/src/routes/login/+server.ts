@@ -11,55 +11,39 @@ const REDIRECT_URI =
 export const POST: RequestHandler = async ({ request }) => {
   const { email, password, loginChallenge } = await request.json();
 
-  try {
-    // Validate credentials (for simplicity, using hardcoded values)
-    if (email !== "prayujtuli@hotmail.com" || password !== "testing") {
-      return new Response(
-        JSON.stringify({
-          error: "The username / password combination is not correct",
-        }),
-        { status: 401, headers: { "Content-Type": "application/json" } },
-      );
-    }
-
-    // Fetch the login request
-    const { data: loginRequest } = await axios.get(
-      `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/login?login_challenge=${loginChallenge}`,
+  if (email !== "prayujtuli@hotmail.com" || password !== "testing") {
+    return new Response(
+      JSON.stringify({
+        error: "The username / password combination is not correct",
+      }),
+      { status: 401, headers: { "Content-Type": "application/json" } },
     );
+  }
 
-    if (loginRequest.skip) {
-      const { data: body } = await axios.put(
-        `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/login/accept?login_challenge=${loginChallenge}`,
-        {
-          subject: String(loginRequest.subject),
-        },
-      );
-      redirect(302, body.redirect_to);
-      //return new Response(JSON.stringify({ redirect_to: body.redirect_to }), {
-      //status: 200,
-      //headers: { "Content-Type": "application/json" },
-      //});
-    }
+  // Fetch the login request
+  const { data: loginRequest } = await axios.get(
+    `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/login?login_challenge=${loginChallenge}`,
+  );
 
-    // Accept the login request
+  if (loginRequest.skip) {
     const { data: body } = await axios.put(
       `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/login/accept?login_challenge=${loginChallenge}`,
       {
-        subject: email,
-        remember: true,
-        remember_for: 3600,
+        subject: String(loginRequest.subject),
       },
     );
-
     redirect(302, body.redirect_to);
-  } catch (error) {
-    console.log(error);
-    return new Response(
-      JSON.stringify({ message: `Unauthorized: ${error.message}` }),
-      {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      },
-    );
   }
+
+  // Accept the login request
+  const { data: body } = await axios.put(
+    `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/login/accept?login_challenge=${loginChallenge}`,
+    {
+      subject: email,
+      remember: true,
+      remember_for: 3600,
+    },
+  );
+
+  redirect(302, body.redirect_to);
 };
