@@ -60,6 +60,7 @@ export const POST: RequestHandler = async ({ request }) => {
       session.id_token.email = consentRequest.subject;
       session.access_token.email = consentRequest.subject;
     }
+    console.log("session", session);
 
     const { data: body } = await axios.put(
       `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent/accept?consent_challenge=${consent_challenge}`,
