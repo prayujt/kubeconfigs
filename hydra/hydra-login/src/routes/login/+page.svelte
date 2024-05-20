@@ -1,7 +1,6 @@
 <script lang="ts">
-    //import { goto } from "$app/navigation";
+    import { goto } from "$app/navigation";
     import { page } from "$app/stores";
-    import { user, token } from "$lib/stores";
 
     let email = "";
     let password = "";
@@ -26,23 +25,8 @@
             if (!res.ok) {
                 throw new Error("Network response was not ok");
             }
-
-		/**
-            const {
-                token: responseToken,
-                email: responseEmail,
-                firstName,
-                lastName,
-            } = await res.json();
-
-            token.set(responseToken);
-            user.set({
-                email: responseEmail,
-                name: `${firstName} ${lastName}`,
-            });
-		**/
-
-            if (res.status === 200) window.location.href = res.body.redirect_to;
+            const { redirect_to } = await res.json();
+            goto(redirect_to);
         } catch (e: any) {
             console.log("Incorrect login");
         } finally {

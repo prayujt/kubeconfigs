@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    //import { goto } from "$app/navigation";
+    import { goto } from "$app/navigation";
 
     let challenge = "";
     let scopes = [];
@@ -26,7 +26,11 @@
             }),
         });
 
-        if (res.status === 200) window.location.href = res.body.redirect_to;
+        if (!res.ok) {
+            throw new Error("Network response was not ok");
+        }
+        const { redirect_to } = await res.json();
+        goto(redirect_to);
     };
 </script>
 
