@@ -1,41 +1,41 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hydra-login
+  name: hydra-idp
   namespace: hydra
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hydra-login
+      app: hydra-idp
   template:
     metadata:
       labels:
-        app: hydra-login
+        app: hydra-idp
     spec:
       containers:
-      - name: hydra-login
+      - name: hydra-idp
         image: docker.prayujt.com/hydra-login
         ports:
         - containerPort: 3000
         env:
         - name: HYDRA_ADMIN_URL
-          value: "https://auth.prayujt.com/admin/admin"
+          value: "http://hydra-admin.hydra.svc.cluster.local:4445"
         - name: CLIENT_ID
-          value: "2cfbd41a-9b59-441a-9e4b-d1bf05db830b"
+          value: "ab2058bb-d35d-4448-9608-d301d308b965"
         - name: CLIENT_SECRET
-          value: "8vOP37.s_xppZhZoEKm6pmFarM"
+          value: "zCXS3v-cRSap.RDhRN1LuXIPLI"
         - name: REDIRECT_URI
           value: "https://docs.prayujt.com/auth/oidc.callback"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: hydra-login
+  name: hydra-idp
   namespace: hydra
 spec:
   selector:
-    app: hydra-login
+    app: hydra-idp
   ports:
     - protocol: TCP
       port: 80

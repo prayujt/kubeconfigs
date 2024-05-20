@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hydra-sql-migration
+  namespace: hydra
+spec:
+  template:
+    spec:
+      containers:
+      - name: hydra-migration
+        image: oryd/hydra:v2.2.0
+        command: ["hydra", "migrate", "sql", "--yes", "postgres://hydra_user:hydra_password@postgres:5432/hydra_db?sslmode=disable"]
+        env:
+        - name: DSN
+          value: "postgres://hydra_user:hydra_password@postgres:5432/hydra_db?sslmode=disable"
+      restartPolicy: OnFailure

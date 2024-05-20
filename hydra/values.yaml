@@ -151,15 +151,17 @@ hydra:
     #   - "foo bar 123 456 lorem 3"
     secrets:
       system:
-        - "UThYVXZySDBQTW84aUpBdXl1SGZsS3FS"
-    dsn: memory
+        - secretName: hydra-secrets
+          secretKey: system-secret
+            # dsn: memory
+    dsn: postgres://hydra_user:hydra_password@postgres:5432/hydra_db?sslmode=disable
 
     urls:
       self:
         issuer: https://auth.prayujt.com
-      login: https://auth.prayujt.com/idp/login
-      consent: https://auth.prayujt.com/idp/consent
-      logout: https://auth.prayujt.com/idp/logout
+      login: https://idp.prayujt.com/login
+      consent: https://idp.prayujt.com/consent
+      logout: https://idp.prayujt.com/logout
 
     # -- Enables database migration
   automigration:

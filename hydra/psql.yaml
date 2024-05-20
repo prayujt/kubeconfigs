@@ -31,7 +31,7 @@ spec:
       volumes:
       - name: postgres-storage
         persistentVolumeClaim:
-          claimName: idp-psql
+          claimName: hydra-postgres-pvc
 ---
 apiVersion: v1
 kind: Service
