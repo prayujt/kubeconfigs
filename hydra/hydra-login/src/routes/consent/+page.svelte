@@ -1,6 +1,5 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { goto } from "$app/navigation";
 
     let challenge = "";
     let scopes = [];
@@ -10,7 +9,7 @@
         challenge = urlParams.get("consent_challenge") || "";
         const res = await fetch(`/consent?consent_challenge=${challenge}`);
         const data = await res.json();
-        scopes = data.scopes;
+        scopes = data.scope;
     });
 
     const handleConsent = async (grant) => {
