@@ -30,7 +30,7 @@
             throw new Error("Network response was not ok");
         }
         const { redirect_to } = await res.json();
-        goto(redirect_to);
+        window.location.href = redirect_to;
     };
 </script>
 
