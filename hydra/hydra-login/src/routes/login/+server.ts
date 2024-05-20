@@ -55,7 +55,7 @@ export const POST: RequestHandler = async ({ request }) => {
     });
   } catch (error) {
     return new Response(
-      JSON.stringify({ message: `Unauthorized: ${error.errors}` }),
+      JSON.stringify({ message: `Unauthorized: ${error.message}` }),
       {
         status: 401,
         headers: { "Content-Type": "application/json" },

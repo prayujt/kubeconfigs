@@ -20,7 +20,7 @@ spec:
         - containerPort: 3000
         env:
         - name: HYDRA_ADMIN_URL
-          value: "https://auth.prayujt.com/public/admin"
+          value: "https://auth.prayujt.com/admin/admin"
         - name: CLIENT_ID
           value: "2cfbd41a-9b59-441a-9e4b-d1bf05db830b"
         - name: CLIENT_SECRET
