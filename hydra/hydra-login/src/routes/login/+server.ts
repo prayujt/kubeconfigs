@@ -1,5 +1,4 @@
 import type { RequestHandler } from "@sveltejs/kit";
-import { redirect } from "@sveltejs/kit";
 
 import axios from "axios";
 
@@ -47,7 +46,6 @@ export const POST: RequestHandler = async ({ request }) => {
       remember_for: 3600,
     },
   );
-  console.log(body);
 
   return new Response(JSON.stringify({ redirect_to: body.redirect_to }), {
     status: 200,
