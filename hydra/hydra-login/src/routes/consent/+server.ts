@@ -45,10 +45,11 @@ export const POST: RequestHandler = async ({ request }) => {
         },
       );
 
-      return new Response(JSON.stringify({ redirect_to: body.redirect_to }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
+      return redirect(302, decodeURIComponent(body.redirect_to));
+      //return new Response(JSON.stringify({ redirect_to: body.redirect_to }), {
+       // status: 200,
+        //headers: { "Content-Type": "application/json" },
+      //});
     }
 
     const { data: body } = await axios.put(
@@ -63,7 +64,7 @@ export const POST: RequestHandler = async ({ request }) => {
       },
     );
 
-    return redirect(200, decodeURIComponent(body.redirect_to));
+    return redirect(302, decodeURIComponent(body.redirect_to));
     // return new Response(
     //     JSON.stringify({ redirect_to: body.redirect_to }),
     //     { status: 200, headers: { 'Content-Type': 'application/json' } }

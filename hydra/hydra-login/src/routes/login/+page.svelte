@@ -40,6 +40,7 @@
                 name: `${firstName} ${lastName}`,
             });
 
+	    if (res.status === 302) window.location.href = res.headers.location;
         } catch (e: any) {
             console.log("Incorrect login");
         } finally {

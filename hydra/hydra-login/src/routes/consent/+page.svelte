@@ -23,6 +23,7 @@
             body: JSON.stringify({ consent_challenge: challenge, grant_scope: scopes, remember: grant }),
         });
 
+	if (res.status === 302) window.location.href = res.headers.location;
         // if (res.ok) {
         //     const { redirect_to } = await res.json();
         //     window.location.href = redirect_to;
