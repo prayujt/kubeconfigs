@@ -80,7 +80,7 @@ export const POST: RequestHandler = async ({ request }) => {
     );
 
     const user: Account[] =
-      (await sql`SELECT id,email,first_name,last_name,username FROM accounts WHERE email='${consentRequest.subject}'`) as unknown as Account[];
+      (await sql`SELECT id,email,first_name,last_name,username FROM accounts WHERE email=${consentRequest.subject}`) as unknown as Account[];
     if (user.length === 0) {
       return new Response(JSON.stringify({ message: "User not found" }), {
         status: 404,
