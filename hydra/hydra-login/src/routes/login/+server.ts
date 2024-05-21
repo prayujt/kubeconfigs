@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ request }) => {
   );
 
   const authorized = await sql`
-    SELECT '${email}' IN (SELECT email FROM accounts WHERE password=encode(sha256('${password}'), 'hex')
+    SELECT '${email}' IN (SELECT email FROM accounts WHERE password=encode(sha256('${password}'), 'hex'))
   `;
   if (!authorized) {
     return new Response("Incorrect login", {
