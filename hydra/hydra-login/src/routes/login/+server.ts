@@ -18,10 +18,15 @@ export const POST: RequestHandler = async ({ request }) => {
     `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}`,
   );
 
-  const authorized = await sql`
-    SELECT ${email} IN (SELECT email FROM accounts WHERE password=encode(sha256(${password}), 'hex'))
-  `;
-  if (!authorized) {
+  let result = await sql`
+    SELECT EXISTS(
+      SELECT * FROM accounts
+      WHERE
+        email=${email}
+        AND
+        password=encode(sha256(${password}), 'hex'))
+    AS authorized`;
+  if (!(result[0].authorized as boolean)) {
     return new Response("Incorrect login", {
       status: 401,
       headers: { "Content-Type": "text/plain" },
