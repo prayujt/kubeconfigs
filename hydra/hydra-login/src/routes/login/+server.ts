@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ request }) => {
   const { email, password, loginChallenge } = await request.json();
 
   const sql = postgres(
-    `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/{${POSTGRES_DATABASE}`,
+    `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}`,
   );
 
   const authorized = await sql`
