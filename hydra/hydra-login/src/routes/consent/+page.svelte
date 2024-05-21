@@ -2,14 +2,14 @@
     import { onMount } from "svelte";
 
     let challenge = "";
-    let scopes = [];
+    let scopes = ["openid", "profile", "email"];
 
     onMount(async () => {
         const urlParams = new URLSearchParams(window.location.search);
         challenge = urlParams.get("consent_challenge") || "";
         const res = await fetch(`/consent?consent_challenge=${challenge}`);
         const data = await res.json();
-        scopes = data.scope;
+        scopes = data.scopes;
     });
 
     const handleConsent = async (grant) => {
