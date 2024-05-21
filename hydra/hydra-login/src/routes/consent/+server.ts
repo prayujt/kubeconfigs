@@ -68,7 +68,7 @@ export const GET: RequestHandler = async ({ url }) => {
 };
 
 export const POST: RequestHandler = async ({ request }) => {
-  const { consent_challenge, grant_scope, remember } = await request.json();
+  const { consent_challenge, grant_scope, granted } = await request.json();
 
   try {
     const { data: consentRequest } = await axios.get(
@@ -88,6 +88,21 @@ export const POST: RequestHandler = async ({ request }) => {
       });
     }
 
+    if (!granted) {
+      const { data: body } = await axios.put(
+        `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent/reject?consent_challenge=${consent_challenge}`,
+        {
+          error: "access_denied",
+          error_description: "The resource owner denied the request",
+          status_code: 403,
+        },
+      );
+
+      return new Response(JSON.stringify({ redirect_to: body.redirect_to }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     if (consentRequest.skip) {
       const { data: body } = await axios.put(
         `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent/accept?consent_challenge=${consent_challenge}`,
@@ -96,7 +111,7 @@ export const POST: RequestHandler = async ({ request }) => {
           grant_access_token_audience:
             consentRequest.requested_access_token_audience,
           session: buildSession(grant_scope, user[0]),
-          remember,
+          remember: true,
           remember_for: 3600,
         },
       );
@@ -114,7 +129,7 @@ export const POST: RequestHandler = async ({ request }) => {
         grant_access_token_audience:
           consentRequest.requested_access_token_audience,
         session: buildSession(grant_scope, user[0]),
-        remember,
+        remember: true,
         remember_for: 3600,
       },
     );

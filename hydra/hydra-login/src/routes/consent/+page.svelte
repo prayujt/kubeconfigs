@@ -12,7 +12,7 @@
         scopes = data.scopes;
     });
 
-    const handleConsent = async (grant) => {
+    const handleConsent = async (granted: boolean) => {
         const res = await fetch("/consent", {
             method: "POST",
             headers: {
@@ -21,7 +21,7 @@
             body: JSON.stringify({
                 consent_challenge: challenge,
                 grant_scope: scopes,
-                remember: grant,
+                granted,
             }),
         });
 
