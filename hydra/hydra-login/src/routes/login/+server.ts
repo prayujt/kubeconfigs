@@ -22,10 +22,10 @@ export const POST: RequestHandler = async ({ request }) => {
     database: POSTGRES_DATABASE,
   });
 
-  const user = await sql`
-    SELECT * FROM users WHERE email = ${email} AND password=encode(sha256(${password}), 'hex')
+  const authorized = await sql`
+    SELECT ${email} IN (SELECT email FROM accounts WHERE password=encode(sha256(${password}), 'hex')
   `;
-  if (user.length === 0) {
+  if (!authorized) {
     return new Response("Unauthorized", {
       status: 401,
       headers: { "Content-Type": "text/plain" },
