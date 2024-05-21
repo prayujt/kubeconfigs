@@ -1,22 +1,35 @@
 import type { RequestHandler } from "@sveltejs/kit";
 
 import axios from "axios";
+import postgres from "postgres";
 
 const HYDRA_ADMIN_URL = process.env.HYDRA_ADMIN_URL || "";
-const CLIENT_ID = process.env.CLIENT_ID || "your-client-id";
-const REDIRECT_URI =
-  process.env.REDIRECT_URI || "https://your-app.com/callback";
+
+const POSTGRES_HOST = process.env.PG_HOST || "hydra-users";
+const POSTGRES_USER = process.env.PG_USER || "hydra_user";
+const POSTGRES_PASSWORD = process.env.PG_PASSWORD || "hydra_password";
+const POSTGRES_DATABASE = process.env.PG_DB || "hydra_db";
+const POSTGRES_PORT = process.env.PG_PORT || "5432";
 
 export const POST: RequestHandler = async ({ request }) => {
   const { email, password, loginChallenge } = await request.json();
 
-  if (email !== "prayujtuli@hotmail.com" || password !== "testing") {
-    return new Response(
-      JSON.stringify({
-        error: "The username / password combination is not correct",
-      }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
-    );
+  const sql = postgres("postgres://username:password@host:port/database", {
+    host: POSTGRES_HOST,
+    port: parseInt(POSTGRES_PORT),
+    username: POSTGRES_USER,
+    password: POSTGRES_PASSWORD,
+    database: POSTGRES_DATABASE,
+  });
+
+  const user = await sql`
+    SELECT * FROM users WHERE email = ${email} AND password=encode(sha256(${password}), 'hex')
+  `;
+  if (user.length === 0) {
+    return new Response("Unauthorized", {
+      status: 401,
+      headers: { "Content-Type": "text/plain" },
+    });
   }
 
   // Fetch the login request
