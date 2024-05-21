@@ -3,7 +3,7 @@ import axios from "axios";
 
 const HYDRA_ADMIN_URL = process.env.HYDRA_ADMIN_URL || "";
 
-const buildSession = async (grant_scope: string[], consentRequest: any) => {
+const buildSession = (grant_scope: string[], consentRequest: any) => {
   const session = { id_token: {}, access_token: {} };
   if (grant_scope.includes("profile")) {
     session.id_token.name = "Prayuj Tuli";
