@@ -3,6 +3,20 @@ import axios from "axios";
 
 const HYDRA_ADMIN_URL = process.env.HYDRA_ADMIN_URL || "";
 
+const buildSession = async (grant_scope: string[], consentRequest: any) => {
+  const session = { id_token: {}, access_token: {} };
+  if (grant_scope.includes("profile")) {
+    session.id_token.name = "Prayuj Tuli";
+    session.access_token.name = "Prayuj Tuli";
+  }
+  if (grant_scope.includes("email")) {
+    session.id_token.email = consentRequest.subject;
+    session.access_token.email = consentRequest.subject;
+  }
+
+  return session;
+};
+
 export const GET: RequestHandler = async ({ url }) => {
   const consent_challenge = url.searchParams.get("consent_challenge");
 
@@ -37,7 +51,7 @@ export const POST: RequestHandler = async ({ request }) => {
           grant_scope,
           grant_access_token_audience:
             consentRequest.requested_access_token_audience,
-          session: {},
+          session: buildSession(grant_scope, consentRequest),
           remember,
           remember_for: 3600,
         },
@@ -49,26 +63,13 @@ export const POST: RequestHandler = async ({ request }) => {
       });
     }
 
-    let session = { id_token: {}, access_token: {} };
-    console.log("grant_scope", grant_scope);
-    console.log("consent_request", consentRequest);
-    if (grant_scope.includes("profile")) {
-      session.id_token.name = "Prayuj Tuli";
-      session.access_token.name = "Prayuj Tuli";
-    }
-    if (grant_scope.includes("email")) {
-      session.id_token.email = consentRequest.subject;
-      session.access_token.email = consentRequest.subject;
-    }
-    console.log("session", session);
-
     const { data: body } = await axios.put(
       `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent/accept?consent_challenge=${consent_challenge}`,
       {
         grant_scope,
         grant_access_token_audience:
           consentRequest.requested_access_token_audience,
-        session,
+        session: buildSession(grant_scope, consentRequest),
         remember,
         remember_for: 3600,
       },
