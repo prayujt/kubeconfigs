@@ -14,19 +14,15 @@ const POSTGRES_PORT = process.env.PG_PORT || "5432";
 export const POST: RequestHandler = async ({ request }) => {
   const { email, password, loginChallenge } = await request.json();
 
-  const sql = postgres("postgres://username:password@host:port/database", {
-    host: POSTGRES_HOST,
-    port: parseInt(POSTGRES_PORT),
-    username: POSTGRES_USER,
-    password: POSTGRES_PASSWORD,
-    database: POSTGRES_DATABASE,
-  });
+  const sql = postgres(
+    `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/{${POSTGRES_DATABASE}`,
+  );
 
   const authorized = await sql`
     SELECT ${email} IN (SELECT email FROM accounts WHERE password=encode(sha256(${password}), 'hex')
   `;
   if (!authorized) {
-    return new Response("Unauthorized", {
+    return new Response("Incorrect login", {
       status: 401,
       headers: { "Content-Type": "text/plain" },
     });

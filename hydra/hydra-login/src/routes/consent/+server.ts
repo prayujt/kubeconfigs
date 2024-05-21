@@ -75,13 +75,9 @@ export const POST: RequestHandler = async ({ request }) => {
       `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent?consent_challenge=${consent_challenge}`,
     );
 
-    const sql = postgres("postgres://username:password@host:port/database", {
-      host: POSTGRES_HOST,
-      port: parseInt(POSTGRES_PORT),
-      username: POSTGRES_USER,
-      password: POSTGRES_PASSWORD,
-      database: POSTGRES_DATABASE,
-    });
+    const sql = postgres(
+      `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/{${POSTGRES_DATABASE}`,
+    );
 
     const user: Account[] =
       (await sql`SELECT id,email,first_name,last_name,username FROM accounts WHERE email=${consentRequest.subject}`) as unknown as Account[];
