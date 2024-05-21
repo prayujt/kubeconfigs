@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hydra-users
+  namespace: hydra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hydra-users
+  template:
+    metadata:
+      labels:
+        app: hydra-users
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:13
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "hydra_db"
+        - name: POSTGRES_USER
+          value: "hydra_user"
+        - name: POSTGRES_PASSWORD
+          value: "hydra_password"
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        - name: init-script
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: hydra-users-pvc
+      - name: init-script
+        configMap:
+          name: hydra-users-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hydra-users
+  namespace: hydra
+spec:
+  ports:
+  - port: 5432
+    targetPort: 5432
+  selector:
+    app: hydra-users
