@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
     import { page } from "$app/stores";
+    import { goto } from "$app/navigation";
 
-    let email = "";
+    let user = "";
     let password = "";
     let isLoading = false;
     let loginChallenge = "";
@@ -19,7 +19,7 @@
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email, password, loginChallenge }),
+                body: JSON.stringify({ user, password, loginChallenge }),
             });
 
             if (!res.ok) {
@@ -33,6 +33,12 @@
             isLoading = false;
         }
     };
+
+    const registerRedirect = () => {
+        const urlSearchParams = new URLSearchParams($page.url.search);
+        const newUrl = `/register?${urlSearchParams.toString()}`;
+        goto(newUrl);
+    };
 </script>
 
 <main class="flex h-screen bg-gray-100">
@@ -44,9 +50,9 @@
             <div class="mb-4">
                 <label
                     class="block text-gray-700 text-sm font-bold mb-2"
-                    for="email"
+                    for="user"
                 >
-                    Email
+                    Username or Email
                 </label>
                 <input
                     class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
@@ -54,10 +60,10 @@
                 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
                 invalid:border-pink-500 invalid:text-pink-600
                 focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
-                    id="email"
-                    type="email"
+                    id="user"
+                    type="user"
                     placeholder="example@prayujt.com"
-                    bind:value={email}
+                    bind:value={user}
                 />
             </div>
             <div class="mb-6">
@@ -77,7 +83,7 @@
                     bind:value={password}
                 />
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between mb-4">
                 <button
                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline relative flex items-center justify-center"
                     type="submit"
@@ -98,6 +104,15 @@
                 >
                     Forgot Password?
                 </a>
+            </div>
+            <div class="flex items-center justify-center">
+                <button
+                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="button"
+                    on:click={() => registerRedirect()}
+                >
+                    Register
+                </button>
             </div>
         </form>
     </div>

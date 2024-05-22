@@ -12,7 +12,7 @@ const POSTGRES_DATABASE = process.env.PG_DB || "hydra_db";
 const POSTGRES_PORT = process.env.PG_PORT || "5432";
 
 export const POST: RequestHandler = async ({ request }) => {
-  const { email, password, loginChallenge } = await request.json();
+  const { user, password, loginChallenge } = await request.json();
 
   const sql = postgres(
     `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}`,
@@ -22,7 +22,7 @@ export const POST: RequestHandler = async ({ request }) => {
     SELECT EXISTS(
       SELECT * FROM accounts
       WHERE
-        email=${email}
+        (email=${user} OR username=${user})
         AND
         password=encode(sha256(${password}), 'hex'))
     AS authorized`;
