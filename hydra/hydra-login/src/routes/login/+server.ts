@@ -23,7 +23,7 @@ export const POST: RequestHandler = async ({ request }) => {
     WHERE
       (email=${user} OR username=${user})
       AND
-      password=encode(sha256(${password}), 'hex'))
+      password=encode(sha256(${password}), 'hex')
   `;
   if (result.length === 0) {
     return new Response("Incorrect login", {
