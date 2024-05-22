@@ -29,8 +29,7 @@
             if (!res.ok) {
                 throw new Error("Network response was not ok");
             }
-            const { redirect_to } = await res.json();
-            window.location.href = redirect_to;
+            loginRedirect();
         } catch (e: any) {
             console.log("Registration error");
         } finally {

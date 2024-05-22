@@ -18,7 +18,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
   let result = await sql`
     INSERT INTO accounts (id, email, password, first_name, last_name, username)
-    VALUES (gen_random_uuid(), ${email}, ${password}, ${firstName}, ${lastName}, ${username})
+    VALUES (gen_random_uuid(), ${email}, encode(sha256(${password}), 'hex'), ${firstName}, ${lastName}, ${username})
   `;
 
   return new Response(JSON.stringify(result), {
