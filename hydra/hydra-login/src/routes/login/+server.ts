@@ -19,14 +19,13 @@ export const POST: RequestHandler = async ({ request }) => {
   );
 
   let result = await sql`
-    SELECT EXISTS(
-      SELECT * FROM accounts
-      WHERE
-        (email=${user} OR username=${user})
-        AND
-        password=encode(sha256(${password}), 'hex'))
-    AS authorized`;
-  if (!(result[0].authorized as boolean)) {
+    SELECT email FROM accounts
+    WHERE
+      (email=${user} OR username=${user})
+      AND
+      password=encode(sha256(${password}), 'hex'))
+  `;
+  if (result.length === 0) {
     return new Response("Incorrect login", {
       status: 401,
       headers: { "Content-Type": "text/plain" },
@@ -55,7 +54,7 @@ export const POST: RequestHandler = async ({ request }) => {
   const { data: body } = await axios.put(
     `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/login/accept?login_challenge=${loginChallenge}`,
     {
-      subject: email,
+      subject: result[0].email,
       remember: true,
       remember_for: 3600,
     },
