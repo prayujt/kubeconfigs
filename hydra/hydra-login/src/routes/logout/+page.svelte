@@ -34,13 +34,13 @@
         <p class="text-gray-600">Do you really want to log out?</p>
         <div class="flex space-x-4">
             <button
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform active:scale-95"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform hover:scale-105 active:scale-95"
                 on:click={() => handleLogout(true)}
             >
                 Yes
             </button>
             <button
-                class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-transform transform active:scale-95"
+                class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-transform transform hover:scale-105 active:scale-95"
                 on:click={() => handleLogout(false)}
             >
                 No

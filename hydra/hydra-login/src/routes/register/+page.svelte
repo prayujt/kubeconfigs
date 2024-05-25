@@ -44,13 +44,13 @@
     };
 </script>
 
-<main class="flex h-screen bg-gray-100">
-    <div class="m-auto w-96">
-        <form
-            class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-            on:submit|preventDefault={handleRegister}
-        >
-            <div class="mb-4">
+<main class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
+        <h1 class="text-2xl font-semibold text-gray-800">
+            Register with Prayuj Authentication
+        </h1>
+        <form class="space-y-4" on:submit|preventDefault={handleRegister}>
+            <div>
                 <label
                     class="block text-gray-700 text-sm font-bold mb-2"
                     for="firstName"
@@ -67,7 +67,7 @@
                     bind:value={firstName}
                 />
             </div>
-            <div class="mb-4">
+            <div>
                 <label
                     class="block text-gray-700 text-sm font-bold mb-2"
                     for="lastName"
@@ -84,7 +84,7 @@
                     bind:value={lastName}
                 />
             </div>
-            <div class="mb-4">
+            <div>
                 <label
                     class="block text-gray-700 text-sm font-bold mb-2"
                     for="email"
@@ -103,7 +103,7 @@
                     bind:value={email}
                 />
             </div>
-            <div class="mb-4">
+            <div>
                 <label
                     class="block text-gray-700 text-sm font-bold mb-2"
                     for="username"
@@ -120,7 +120,7 @@
                     bind:value={username}
                 />
             </div>
-            <div class="mb-6">
+            <div>
                 <label
                     class="block text-gray-700 text-sm font-bold mb-2"
                     for="password"
@@ -137,25 +137,25 @@
                     bind:value={password}
                 />
             </div>
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-center">
                 <button
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline relative flex items-center justify-center"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out transform hover:scale-105 active:scale-95"
                     type="submit"
                     disabled={isLoading}
                 >
                     {#if isLoading}
                         <span>Registering...</span>
                         <div
-                            class="font-neue-helvetica ml-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+                            class="ml-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
                         ></div>
                     {:else}
                         Register
                     {/if}
                 </button>
             </div>
-            <div class="flex items-center justify-center">
+            <div class="flex items-center justify-center mt-4">
                 <a
-                    class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+                    class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 cursor-pointer"
                     on:click={() => loginRedirect()}
                 >
                     Already have an account? Sign In

@@ -46,6 +46,9 @@
 
 <main class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
     <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
+        <h1 class="text-2xl font-semibold text-gray-800">
+            Sign in with Prayuj Authentication
+        </h1>
         <form class="space-y-4" on:submit|preventDefault={handleLogin}>
             {#if errorMessage}
                 <div
@@ -104,9 +107,9 @@
                     bind:value={password}
                 />
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-center">
                 <button
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform active:scale-95"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform hover:scale-105 active:scale-95"
                     type="submit"
                     disabled={isLoading}
                 >
@@ -119,21 +122,14 @@
                         Sign In
                     {/if}
                 </button>
-                <a
-                    class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
-                    href="#"
-                >
-                    Forgot Password?
-                </a>
             </div>
             <div class="flex items-center justify-center mt-4">
-                <button
-                    class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-transform transform active:scale-95"
-                    type="button"
+                <a
+                    class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 cursor-pointer"
                     on:click={() => registerRedirect()}
                 >
-                    Register
-                </button>
+                    Don't have an account? Create one
+                </a>
             </div>
         </form>
     </div>
