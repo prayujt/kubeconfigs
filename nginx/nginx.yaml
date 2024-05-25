@@ -51,6 +51,8 @@ spec:
               mountPath: /var/www/prayujt.com
             - name: prayujt-resume-volume
               mountPath: /var/www/prayujt.com/resume
+            - name: matrix-server-volume
+              mountPath: /var/www
       volumes:
         - name: nginx-config-volume
           emptyDir: {}
@@ -70,7 +72,9 @@ spec:
         - name: prayujt-resume-volume
           persistentVolumeClaim:
             claimName: prayujt-resume
-
+        - name: matrix-server-volume
+          configMap:
+            name: matrix-server-config
 ---
 apiVersion: v1
 kind: Service
@@ -96,5 +100,10 @@ spec:
       port: 22
       targetPort: 22
       nodePort: 10002
+    - name: nginx-matrix-admin
+      protocol: TCP
+      port: 8448
+      targetPort: 8448
+      nodePort: 10003
   type: NodePort
 

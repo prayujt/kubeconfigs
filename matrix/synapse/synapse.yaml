@@ -1,38 +1,120 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: synapse
   namespace: matrix
-  name: matrix-deployment
-  labels:
-    app: matrix
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: matrix
+      app: synapse-server
   template:
     metadata:
       labels:
-        app: matrix
+        app: synapse-server
     spec:
+      initContainers:
+      - name: init-permissions
+        image: busybox
+        command: ['sh', '-c', 'chmod -R 777 /data']
+        volumeMounts:
+        - name: synapse-data
+          mountPath: /data
       containers:
-      - name: matrix
-        image: avhost/docker-matrix:latest
+      - name: synapse-server
+        image: docker.io/matrixdotorg/synapse:latest
+        securityContext:
+          runAsUser: 0
+        env:
+        - name: SYNAPSE_CONFIG_PATH
+          value: /data/homeserver.yaml
+        volumeMounts:
+        - name: synapse-data
+          mountPath: /data
         ports:
         - containerPort: 8008
+        - containerPort: 8448
+        resources:
+          requests:
+            memory: "2Gi"
+          limits:
+            memory: "4Gi"
+              #livenessProbe:
+              #httpGet:
+              #path: /_matrix/client/versions
+              #port: 8008
+              #initialDelaySeconds: 30
+              #periodSeconds: 10
+              #readinessProbe:
+              #httpGet:
+              #path: /_matrix/client/versions
+              #port: 8008
+              #initialDelaySeconds: 30
+              #periodSeconds: 10
+      volumes:
+      - name: synapse-data
+        persistentVolumeClaim:
+          claimName: synapse-server-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synapse-db
+  namespace: matrix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: synapse-db
+  template:
+    metadata:
+      labels:
+        app: synapse-db
+    spec:
+      containers:
+      - name: synapse-db
+        image: docker.io/postgres:12-alpine
         env:
-        - name: SERVER_NAME
-          value: "prayujt.com"
+        - name: POSTGRES_USER
+          value: synapse_user
+        - name: POSTGRES_PASSWORD
+          value: synapse_pass
+        - name: POSTGRES_DB
+          value: synapse
+        - name: POSTGRES_INITDB_ARGS
+          value: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: synapse-psql-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: matrix-service
+  name: synapse-server
   namespace: matrix
 spec:
   selector:
-    app: matrix
+    app: synapse-server
   ports:
-    - protocol: TCP
-      port: 8008
-      targetPort: 8008
+  - name: http
+    port: 8008
+    targetPort: 8008
+  - name: https
+    port: 8448
+    targetPort: 8448
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: synapse-db
+  namespace: matrix
+spec:
+  selector:
+    app: synapse-db
+  ports:
+  - port: 5432
+    targetPort: 5432
