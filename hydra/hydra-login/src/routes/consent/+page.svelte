@@ -3,13 +3,17 @@
 
     let challenge = "";
     let scopes = ["openid", "profile", "email"];
+    let clientName = "This application";
 
     onMount(async () => {
         const urlParams = new URLSearchParams(window.location.search);
         challenge = urlParams.get("consent_challenge") || "";
         const res = await fetch(`/consent?consent_challenge=${challenge}`);
         const data = await res.json();
-        scopes = data.scopes;
+        if (!data.message) {
+            scopes = data.scopes;
+            clientName = data.clientName;
+        }
     });
 
     const handleConsent = async (granted: boolean) => {
@@ -33,28 +37,37 @@
     };
 </script>
 
-<main class="flex h-screen bg-gray-100">
-    <div class="m-auto w-96">
-        <h1 class="mb-4">Consent</h1>
-        <p class="mb-4">
-            The application is requesting access to the following scopes:
+<main class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
+        <h1 class="text-2xl font-semibold text-gray-800">
+            Prayuj Authentication
+        </h1>
+        <p class="text-gray-600">
+            <span class="font-medium">{clientName}</span> is requesting access to
+            the following scopes:
         </p>
-        <ul class="mb-4">
+        <ul class="space-y-2">
             {#each scopes as scope}
-                <li>{scope}</li>
+                <li
+                    class="flex items-center p-2 bg-gray-100 border border-gray-200 rounded-lg shadow-sm"
+                >
+                    <span class="ml-2 text-gray-700">{scope}</span>
+                </li>
             {/each}
         </ul>
-        <button
-            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            on:click={() => handleConsent(true)}
-        >
-            Allow
-        </button>
-        <button
-            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            on:click={() => handleConsent(false)}
-        >
-            Deny
-        </button>
+        <div class="flex space-x-4">
+            <button
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform active:scale-95"
+                on:click={() => handleConsent(true)}
+            >
+                Allow
+            </button>
+            <button
+                class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-transform transform active:scale-95"
+                on:click={() => handleConsent(false)}
+            >
+                Deny
+            </button>
+        </div>
     </div>
 </main>

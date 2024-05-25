@@ -58,7 +58,10 @@ export const GET: RequestHandler = async ({ url }) => {
       `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent?consent_challenge=${consent_challenge}`,
     );
     return new Response(
-      JSON.stringify({ scopes: consentRequest.requested_scope }),
+      JSON.stringify({
+        scopes: consentRequest.requested_scope,
+        clientName: consentRequest.client.client_name,
+      }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (error) {
