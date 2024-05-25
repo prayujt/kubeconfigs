@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sliding-sync
+  namespace: matrix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sliding-sync
+  template:
+    metadata:
+      labels:
+        app: sliding-sync
+    spec:
+      containers:
+      - name: sliding-sync
+        image: ghcr.io/matrix-org/sliding-sync:latest
+        ports:
+        - containerPort: 8009
+        env:
+        - name: SYNCV3_SERVER
+          value: "https://matrix.prayujt.com"
+        - name: SYNCV3_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: syncv3-secret
+              key: secret
+        - name: SYNCV3_BINDADDR
+          value: ":8009"
+        - name: SYNCV3_DB
+          value: "user=sync_user dbname=syncv3 sslmode=disable host=sync-postgres password=sync_password"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sync-postgres
+  namespace: matrix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sync-postgres
+  template:
+    metadata:
+      labels:
+        app: sync-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:latest
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: "sync_user"
+        - name: POSTGRES_PASSWORD
+          value: "sync_password"
+        - name: POSTGRES_DB
+          value: "syncv3"
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgres-storage
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: sync-psql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sliding-sync
+  namespace: matrix
+spec:
+  selector:
+    app: sliding-sync
+  ports:
+    - protocol: TCP
+      port: 8009
+      targetPort: 8009
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sync-postgres
+  namespace: matrix
+spec:
+  selector:
+    app: sync-postgres
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP
