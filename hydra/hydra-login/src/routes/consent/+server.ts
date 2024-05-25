@@ -35,12 +35,14 @@ const buildSession = (grant_scope: string[], user: Account): Session => {
       ...(grant_scope.includes("email") && { email: user.email }),
       ...(grant_scope.includes("profile") && {
         name: `${user.first_name} ${user.last_name}`,
+        username: user.username,
       }),
     },
     access_token: {
       ...(grant_scope.includes("email") && { email: user.email }),
       ...(grant_scope.includes("profile") && {
         name: `${user.first_name} ${user.last_name}`,
+        username: user.username,
       }),
     },
   };
