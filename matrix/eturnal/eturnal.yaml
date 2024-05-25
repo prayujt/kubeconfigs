@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eturnal
+  namespace: matrix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eturnal
+  template:
+    metadata:
+      labels:
+        app: eturnal
+    spec:
+      containers:
+      - name: eturnal
+        image: ghcr.io/processone/eturnal:latest
+        ports:
+        - containerPort: 3478
+          protocol: TCP
+        - containerPort: 3478
+          protocol: UDP
+        - containerPort: 49152
+          protocol: UDP
+        - containerPort: 65535
+          protocol: UDP
+        volumeMounts:
+        - name: eturnal-config
+          mountPath: /etc
+      volumes:
+      - name: eturnal-config
+        persistentVolumeClaim:
+          claimName: turn-server-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eturnal
+  namespace: matrix
+spec:
+  selector:
+    app: eturnal
+  ports:
+  - name: tcp-3478
+    protocol: TCP
+    port: 3478
+    targetPort: 3478
+  - name: udp-3478
+    protocol: UDP
+    port: 3478
+    targetPort: 3478
+  - name: udp-range1
+    protocol: UDP
+    port: 49152
+    targetPort: 49152
+  - name: udp-range2
+    protocol: UDP
+    port: 65535
+    targetPort: 65535
+  type: ClusterIP
+

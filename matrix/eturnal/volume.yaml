@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: turn-server-pv
+  namespace: matrix
+spec:
+  capacity:
+    storage: 50Mi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/.synapse/turn
+    server: 192.168.86.100
+  storageClassName: turn-server-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: turn-server-pvc
+  namespace: matrix
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Mi
+  volumeName: turn-server-pv
+  storageClassName: turn-server-config

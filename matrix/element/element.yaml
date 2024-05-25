@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: element
+  namespace: matrix
+spec:
+  selector:
+    matchLabels:
+      app: element
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: element
+    spec:
+      containers:
+      - name: element
+        image: vectorim/element-web:latest
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config.json
+          subPath: config.json
+        ports:
+        - containerPort: 80
+          name: element
+          protocol: TCP
+        readinessProbe:
+            httpGet:
+                path: /
+                port: element
+            initialDelaySeconds: 2
+            periodSeconds: 3
+        livenessProbe:
+            httpGet:
+                path: /
+                port: element
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+      - name: config-volume
+        configMap:
+          name: element-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: element
+  namespace: matrix
+spec:
+  selector:
+    app: element
+  ports:
+    - name: default
+      protocol: TCP
+      port: 80
+      targetPort: 80
