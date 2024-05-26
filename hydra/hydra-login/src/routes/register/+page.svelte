@@ -9,29 +9,88 @@
     let username = "";
     let isLoading = false;
 
+    const KRATOS_PUBLIC_URL = "https://kratos.prayujt.com";
+
     const handleRegister = async () => {
         isLoading = true;
         try {
-            const res = await fetch("/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
+            const initResponse = await fetch(
+                `${KRATOS_PUBLIC_URL}/self-service/registration/browser`,
+                {
+                    method: "GET",
+                    headers: {
+                        Accept: "application/json",
+                    },
                 },
-                body: JSON.stringify({
-                    firstName,
-                    lastName,
-                    email,
-                    password,
-                    username,
-                }),
-            });
+            );
 
-            if (!res.ok) {
-                throw new Error("Network response was not ok");
+            if (!initResponse.ok) {
+                const errorData = await initResponse.json();
+                console.error("Error initiating registration flow", errorData);
+                throw new Error("Failed to initiate registration flow");
             }
+
+            const flow = await initResponse.json();
+
+            const csrfToken = flow.ui.nodes.find(
+                (node) => node.attributes.name === "csrf_token",
+            )?.attributes.value;
+
+            if (!csrfToken) {
+                throw new Error("CSRF token not found");
+            }
+
+            // const registrationFlow = await fetch(
+            //     `${KRATOS_PUBLIC_URL}/self-service/registration/flows?id=${flow.id}`,
+            //     {
+            //         method: "GET",
+            //         headers: {
+            //             Accept: "application/json",
+            //             "X-CSRF-Token": csrfToken,
+            //         },
+            //         credentials: "include",
+            //     },
+            // );
+            //
+            // if (!registrationFlow.ok) {
+            //     const errorData = await registrationFlow.json();
+            //     console.error("Error getting registration flow", errorData);
+            //     throw new Error("Failed to retrieve registration flow");
+            // }
+            //
+            const registrationResponse = await fetch(
+                `${KRATOS_PUBLIC_URL}/self-service/registration?flow=${flow.id}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        csrf_token: csrfToken,
+                        method: "password",
+                        traits: {
+                            email,
+                            username,
+                            firstName,
+                            lastName,
+                        },
+                        password,
+                    }),
+                },
+            );
+
+            if (!registrationResponse.ok) {
+                const errorData = await registrationResponse.json();
+                console.error("Error completing registration", errorData);
+                throw new Error("Failed to complete registration");
+            }
+
+            const result = await registrationResponse.json();
+            console.log(result);
+
             loginRedirect();
         } catch (e: any) {
-            console.log("Registration error");
+            console.log("Registration error:", e);
         } finally {
             isLoading = false;
         }
