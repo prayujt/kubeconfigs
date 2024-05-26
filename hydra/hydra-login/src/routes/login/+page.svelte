@@ -2,11 +2,13 @@
     import { page } from "$app/stores";
     import { goto } from "$app/navigation";
 
-    let user = "";
+    let identifier = "";
     let password = "";
     let isLoading = false;
     let loginChallenge = "";
     let errorMessage = "";
+
+    const KRATOS_PUBLIC_URL = "https://kratos.prayujt.com";
 
     $: {
         loginChallenge = $page.url.searchParams.get("login_challenge") || "";
@@ -16,22 +18,82 @@
         isLoading = true;
         errorMessage = "";
         try {
-            const res = await fetch("/login", {
+            const initResponse = await fetch(
+                `${KRATOS_PUBLIC_URL}/self-service/login/browser`,
+                {
+                    method: "GET",
+                    headers: {
+                        Accept: "application/json",
+                    },
+                    credentials: "include",
+                },
+            );
+
+            if (!initResponse.ok) {
+                const errorData = await initResponse.json();
+                console.error("Error initiating login flow", errorData);
+                throw new Error("Failed to initiate login flow");
+            }
+
+            const flow = await initResponse.json();
+
+            const csrfToken = flow.ui.nodes.find(
+                (node: any) => node.attributes.name === "csrf_token",
+            )?.attributes.value;
+
+            if (!csrfToken) {
+                throw new Error("CSRF token not found");
+            }
+
+            const loginResponse = await fetch(
+                `${KRATOS_PUBLIC_URL}/self-service/login?flow=${flow.id}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": csrfToken,
+                    },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        csrf_token: csrfToken,
+                        method: "password",
+                        identifier,
+                        password,
+                    }),
+                },
+            );
+
+            if (!loginResponse.ok) {
+                const errorData = await loginResponse.json();
+                console.error("Error completing login", errorData);
+                throw new Error("Failed to complete login");
+            }
+
+            const result = await loginResponse.json();
+
+            const { session } = result;
+
+            const serverResponse = await fetch("/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ user, password, loginChallenge }),
+                body: JSON.stringify({
+                    subject: identifier,
+                    session,
+                    loginChallenge,
+                }),
             });
 
-            if (!res.ok) {
+            if (!serverResponse.ok) {
                 throw new Error("Network response was not ok");
             }
-            const { redirect_to } = await res.json();
+
+            const { redirect_to } = await serverResponse.json();
             window.location.href = redirect_to;
         } catch (e: any) {
             errorMessage =
-                "Incorrect login. Please check your username and password.";
+                "Incorrect login. Please check your username or email and password.";
         } finally {
             isLoading = false;
         }
@@ -74,7 +136,7 @@
             <div>
                 <label
                     class="block text-gray-700 text-sm font-bold mb-2"
-                    for="user"
+                    for="identifier"
                 >
                     Username or Email
                 </label>
@@ -84,10 +146,10 @@
                 disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
                 invalid:border-pink-500 invalid:text-pink-600
                 focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
-                    id="user"
-                    type="user"
+                    id="identifier"
+                    type="identifier"
                     placeholder="example@prayujt.com"
-                    bind:value={user}
+                    bind:value={identifier}
                 />
             </div>
             <div>

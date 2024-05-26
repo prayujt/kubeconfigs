@@ -4,15 +4,18 @@
     let challenge = "";
     let scopes = ["openid", "profile", "email"];
     let clientName = "This application";
+    let identity = {};
 
     onMount(async () => {
         const urlParams = new URLSearchParams(window.location.search);
         challenge = urlParams.get("consent_challenge") || "";
         const res = await fetch(`/consent?consent_challenge=${challenge}`);
         const data = await res.json();
+        console.log(data);
         if (!data.message) {
             scopes = data.scopes;
             clientName = data.clientName;
+            identity = data.context;
         }
     });
 
@@ -26,6 +29,7 @@
                 consent_challenge: challenge,
                 grant_scope: scopes,
                 granted,
+                identity,
             }),
         });
 

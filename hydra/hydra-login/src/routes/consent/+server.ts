@@ -1,7 +1,6 @@
 import type { RequestHandler } from "@sveltejs/kit";
 
 import axios from "axios";
-import postgres from "postgres";
 
 declare interface Session {
   id_token: Identity;
@@ -22,12 +21,6 @@ declare interface Account {
 }
 
 const HYDRA_ADMIN_URL = process.env.HYDRA_ADMIN_URL || "";
-
-const POSTGRES_HOST = process.env.PG_HOST || "hydra-users";
-const POSTGRES_USER = process.env.PG_USER || "hydra_user";
-const POSTGRES_PASSWORD = process.env.PG_PASSWORD || "hydra_password";
-const POSTGRES_DATABASE = process.env.PG_DB || "hydra_db";
-const POSTGRES_PORT = process.env.PG_PORT || "5432";
 
 const buildSession = (grant_scope: string[], user: Account): Session => {
   const session: Session = {
@@ -61,6 +54,7 @@ export const GET: RequestHandler = async ({ url }) => {
       JSON.stringify({
         scopes: consentRequest.requested_scope,
         clientName: consentRequest.client.client_name,
+        context: consentRequest.context,
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -73,25 +67,25 @@ export const GET: RequestHandler = async ({ url }) => {
 };
 
 export const POST: RequestHandler = async ({ request }) => {
-  const { consent_challenge, grant_scope, granted } = await request.json();
+  const { consent_challenge, scopes, granted, identity } = await request.json();
 
   try {
     const { data: consentRequest } = await axios.get(
       `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent?consent_challenge=${consent_challenge}`,
     );
 
-    const sql = postgres(
-      `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}`,
-    );
+    // const sql = postgres(
+    //   `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}`,
+    // );
 
-    const user: Account[] =
-      (await sql`SELECT id,email,first_name,last_name,username FROM accounts WHERE email=${consentRequest.subject}`) as unknown as Account[];
-    if (user.length === 0) {
-      return new Response(JSON.stringify({ message: "User not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    // const user: Account[] =
+    //   (await sql`SELECT id,email,first_name,last_name,username FROM accounts WHERE email=${consentRequest.subject}`) as unknown as Account[];
+    // if (user.length === 0) {
+    //   return new Response(JSON.stringify({ message: "User not found" }), {
+    //     status: 404,
+    //     headers: { "Content-Type": "application/json" },
+    //   });
+    // }
 
     if (!granted) {
       const { data: body } = await axios.put(
@@ -112,10 +106,10 @@ export const POST: RequestHandler = async ({ request }) => {
       const { data: body } = await axios.put(
         `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent/accept?consent_challenge=${consent_challenge}`,
         {
-          grant_scope,
+          grant_scope: scopes,
           grant_access_token_audience:
             consentRequest.requested_access_token_audience,
-          session: buildSession(grant_scope, user[0]),
+          session: buildSession(scopes, identity),
           remember: true,
           remember_for: 3600,
         },
@@ -130,10 +124,10 @@ export const POST: RequestHandler = async ({ request }) => {
     const { data: body } = await axios.put(
       `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent/accept?consent_challenge=${consent_challenge}`,
       {
-        grant_scope,
+        grant_scope: scopes,
         grant_access_token_audience:
           consentRequest.requested_access_token_audience,
-        session: buildSession(grant_scope, user[0]),
+        session: buildSession(scopes, identity),
         remember: true,
         remember_for: 3600,
       },
