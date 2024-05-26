@@ -159,9 +159,9 @@ hydra:
     urls:
       self:
         issuer: https://auth.prayujt.com
-      login: https://idp.prayujt.com/login
-      consent: https://idp.prayujt.com/consent
-      logout: https://idp.prayujt.com/logout
+      login: https://login.prayujt.com/login
+      consent: https://login.prayujt.com/consent
+      logout: https://login.prayujt.com/logout
 
     # -- Enables database migration
   automigration:

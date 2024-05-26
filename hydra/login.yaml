@@ -23,6 +23,8 @@ spec:
           value: "http://hydra-admin.hydra.svc.cluster.local:4445"
         - name: KRATOS_ADMIN_URL
           value: "http://kratos-admin.kratos.svc.cluster.local"
+        - name: KRATOS_PUBLIC_URL
+          value: "https://idp.prayujt.com"
 ---
 apiVersion: v1
 kind: Service
