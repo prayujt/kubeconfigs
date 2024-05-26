@@ -13,7 +13,7 @@ declare interface Identity {
   username?: string;
 }
 
-declare interface Account {
+declare interface KratosTraits {
   id: string;
   email: string;
   firstName: string;
@@ -22,8 +22,9 @@ declare interface Account {
 }
 
 const HYDRA_ADMIN_URL = process.env.HYDRA_ADMIN_URL || "";
+const KRATOS_ADMIN_URL = process.env.KRATOS_ADMIN_URL || "";
 
-const buildSession = (grant_scope: string[], user: Account): Session => {
+const buildSession = (grant_scope: string[], user: KratosTraits): Session => {
   const session: Session = {
     id_token: {
       ...(grant_scope.includes("email") && { email: user.email }),
@@ -53,9 +54,7 @@ export const GET: RequestHandler = async ({ url }) => {
     );
     return new Response(
       JSON.stringify({
-        scopes: consentRequest.requested_scope,
-        clientName: consentRequest.client.client_name,
-        context: consentRequest.context,
+        consentRequest,
       }),
       { status: 200, headers: { "Content-Type": "application/json" } },
     );
@@ -68,24 +67,17 @@ export const GET: RequestHandler = async ({ url }) => {
 };
 
 export const POST: RequestHandler = async ({ request }) => {
-  const { consent_challenge, scopes, granted, identity } = await request.json();
+  const { consentRequest, consent_challenge, granted } = await request.json();
 
-  try {
-    const { data: consentRequest } = await axios.get(
-      `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent?consent_challenge=${consent_challenge}`,
+  if (!consentRequest)
+    return new Response(
+      JSON.stringify({ message: "No consent information found" }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      },
     );
-
-    console.log(identity);
-    if (!identity) {
-      return new Response(
-        JSON.stringify({ message: "No user information found" }),
-        {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    }
-
+  try {
     if (!granted) {
       const { data: body } = await axios.put(
         `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent/reject?consent_challenge=${consent_challenge}`,
@@ -101,14 +93,27 @@ export const POST: RequestHandler = async ({ request }) => {
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    if (!consentRequest.subject) {
+      return new Response(JSON.stringify({ message: "No user id found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const identityResponse = await axios.get(
+      `${KRATOS_ADMIN_URL}/admin/identities/${consentRequest.subject}`,
+    );
+    const traits = identityResponse.data.traits;
+
     if (consentRequest.skip) {
       const { data: body } = await axios.put(
         `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent/accept?consent_challenge=${consent_challenge}`,
         {
-          grant_scope: scopes,
+          grant_scope: consentRequest.requested_scope,
           grant_access_token_audience:
             consentRequest.requested_access_token_audience,
-          session: buildSession(scopes, identity),
+          session: buildSession(consentRequest.requested_scope, traits),
           remember: true,
           remember_for: 3600,
         },
@@ -123,10 +128,10 @@ export const POST: RequestHandler = async ({ request }) => {
     const { data: body } = await axios.put(
       `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent/accept?consent_challenge=${consent_challenge}`,
       {
-        grant_scope: scopes,
+        grant_scope: consentRequest.requested_scope,
         grant_access_token_audience:
           consentRequest.requested_access_token_audience,
-        session: buildSession(scopes, identity),
+        session: buildSession(consentRequest.requested_scope, traits),
         remember: true,
         remember_for: 3600,
       },

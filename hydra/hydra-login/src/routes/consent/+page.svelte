@@ -2,9 +2,7 @@
     import { onMount } from "svelte";
 
     let challenge = "";
-    let scopes = ["openid", "profile", "email"];
-    let clientName = "This application";
-    let identity = {};
+    let consentRequest: any = undefined;
 
     onMount(async () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -13,9 +11,7 @@
         const data = await res.json();
         console.log(data);
         if (!data.message) {
-            scopes = data.scopes;
-            clientName = data.clientName;
-            identity = data.context;
+            consentRequest = data;
         }
     });
 
@@ -27,9 +23,8 @@
             },
             body: JSON.stringify({
                 consent_challenge: challenge,
-                grant_scope: scopes,
+                consentRequest,
                 granted,
-                identity,
             }),
         });
 
@@ -47,31 +42,34 @@
             Prayuj Authentication
         </h1>
         <p class="text-gray-600">
-            <span class="font-medium">{clientName}</span> is requesting access to
-            the following scopes:
+            <span class="font-medium"
+                >{consentRequest.clientName || "This application"}</span
+            > is requesting access to the following scopes:
         </p>
-        <ul class="space-y-2">
-            {#each scopes as scope}
-                <li
-                    class="flex items-center p-2 bg-gray-100 border border-gray-200 rounded-lg shadow-sm"
+        {#if consentRequest.scopes}
+            <ul class="space-y-2">
+                {#each consentRequest.scopes as scope}
+                    <li
+                        class="flex items-center p-2 bg-gray-100 border border-gray-200 rounded-lg shadow-sm"
+                    >
+                        <span class="ml-2 text-gray-700">{scope}</span>
+                    </li>
+                {/each}
+            </ul>
+            <div class="flex space-x-4">
+                <button
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform active:scale-95"
+                    on:click={() => handleConsent(true)}
                 >
-                    <span class="ml-2 text-gray-700">{scope}</span>
-                </li>
-            {/each}
-        </ul>
-        <div class="flex space-x-4">
-            <button
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform active:scale-95"
-                on:click={() => handleConsent(true)}
-            >
-                Allow
-            </button>
-            <button
-                class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-transform transform active:scale-95"
-                on:click={() => handleConsent(false)}
-            >
-                Deny
-            </button>
-        </div>
+                    Allow
+                </button>
+                <button
+                    class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-transform transform active:scale-95"
+                    on:click={() => handleConsent(false)}
+                >
+                    Deny
+                </button>
+            </div>
+        {/if}
     </div>
 </main>
