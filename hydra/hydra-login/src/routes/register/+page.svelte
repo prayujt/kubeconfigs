@@ -21,6 +21,7 @@
                     headers: {
                         Accept: "application/json",
                     },
+                    credentials: "include",
                 },
             );
 
@@ -40,24 +41,6 @@
                 throw new Error("CSRF token not found");
             }
 
-            // const registrationFlow = await fetch(
-            //     `${KRATOS_PUBLIC_URL}/self-service/registration/flows?id=${flow.id}`,
-            //     {
-            //         method: "GET",
-            //         headers: {
-            //             Accept: "application/json",
-            //             "X-CSRF-Token": csrfToken,
-            //         },
-            //         credentials: "include",
-            //     },
-            // );
-            //
-            // if (!registrationFlow.ok) {
-            //     const errorData = await registrationFlow.json();
-            //     console.error("Error getting registration flow", errorData);
-            //     throw new Error("Failed to retrieve registration flow");
-            // }
-            //
             const registrationResponse = await fetch(
                 `${KRATOS_PUBLIC_URL}/self-service/registration?flow=${flow.id}`,
                 {
