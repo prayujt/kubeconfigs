@@ -15,8 +15,9 @@
             console.log("Consent request information:");
             console.log(data);
             if (!data.message) {
-                if (data.redirect_to) window.location.href = data.redirect_to;
-                else consentRequest = data;
+                consentRequest = data;
+                if (consentRequest.redirect_to)
+                    window.location.href = data.redirect_to;
             } else {
                 error = true;
             }
