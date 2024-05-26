@@ -12,7 +12,6 @@
         try {
             const res = await fetch(`/consent?consent_challenge=${challenge}`);
             const data = await res.json();
-            console.log(data);
             if (!data.message) {
                 consentRequest = data;
             } else {
@@ -57,7 +56,7 @@
                     class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"
                 ></div>
             </div>
-        {:else if error}
+        {:else if error || !consentRequest}
             <div class="text-center text-red-600">
                 <p class="text-lg font-semibold">
                     Failed to load consent information

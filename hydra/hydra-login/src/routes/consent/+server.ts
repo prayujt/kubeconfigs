@@ -52,12 +52,10 @@ export const GET: RequestHandler = async ({ url }) => {
     const { data: consentRequest } = await axios.get(
       `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent?consent_challenge=${consent_challenge}`,
     );
-    return new Response(
-      JSON.stringify({
-        consentRequest,
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify(consentRequest), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     return new Response(
       JSON.stringify({ message: "Error fetching consent request" }),
@@ -142,8 +140,6 @@ export const POST: RequestHandler = async ({ request }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.log(error);
-    console.log(error.message);
     return new Response(
       JSON.stringify({ message: "Error during consent handling" }),
       { status: 500, headers: { "Content-Type": "application/json" } },
