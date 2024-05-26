@@ -67,11 +67,12 @@
             </div>
         {:else}
             <p class="text-gray-600">
-                <span class="font-medium">{consentRequest.clientName}</span> is requesting
-                access to the following scopes:
+                <span class="font-medium"
+                    >{consentRequest.client.client_name}</span
+                > is requesting access to the following scopes:
             </p>
             <ul class="space-y-2">
-                {#each consentRequest.scopes as scope}
+                {#each consentRequest.requested_scope as scope}
                     <li
                         class="flex items-center p-2 bg-gray-100 border border-gray-200 rounded-lg shadow-sm"
                     >
@@ -81,13 +82,13 @@
             </ul>
             <div class="flex space-x-4">
                 <button
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform active:scale-95"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform hover:scale-105 active:scale-95"
                     on:click={() => handleConsent(true)}
                 >
                     Allow
                 </button>
                 <button
-                    class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-transform transform active:scale-95"
+                    class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-transform transform hover:scale-105 active:scale-95"
                     on:click={() => handleConsent(false)}
                 >
                     Deny
