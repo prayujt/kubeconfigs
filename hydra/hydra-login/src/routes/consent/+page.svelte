@@ -63,7 +63,7 @@
                     Failed to load consent information
                 </p>
                 <p class="text-gray-600">
-                    Please try again later or contact support.
+                    Please try again later or contact Prayuj himself.
                 </p>
             </div>
         {:else}
