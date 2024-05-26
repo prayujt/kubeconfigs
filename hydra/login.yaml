@@ -21,12 +21,8 @@ spec:
         env:
         - name: HYDRA_ADMIN_URL
           value: "http://hydra-admin.hydra.svc.cluster.local:4445"
-        - name: CLIENT_ID
-          value: "ab2058bb-d35d-4448-9608-d301d308b965"
-        - name: CLIENT_SECRET
-          value: "zCXS3v-cRSap.RDhRN1LuXIPLI"
-        - name: REDIRECT_URI
-          value: "https://docs.prayujt.com/auth/oidc.callback"
+        - name: KRATOS_ADMIN_URL
+          value: "http://kratos-admin.kratos.svc.cluster.local"
 ---
 apiVersion: v1
 kind: Service
