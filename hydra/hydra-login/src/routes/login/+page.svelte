@@ -8,7 +8,8 @@
     let loginChallenge = "";
     let errorMessage = "";
 
-    const KRATOS_PUBLIC_URL = "https://kratos.prayujt.com";
+    const KRATOS_PUBLIC_URL =
+        process.env.KRATOS_PUBLIC_URL || "https://idp.prayujt.com";
 
     $: {
         loginChallenge = $page.url.searchParams.get("login_challenge") || "";

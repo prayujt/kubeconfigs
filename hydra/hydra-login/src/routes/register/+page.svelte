@@ -9,7 +9,8 @@
     let username = "";
     let isLoading = false;
 
-    const KRATOS_PUBLIC_URL = "https://kratos.prayujt.com";
+    const KRATOS_PUBLIC_URL =
+        process.env.KRATOS_PUBLIC_URL || "https://idp.prayujt.com";
 
     const handleRegister = async () => {
         isLoading = true;
