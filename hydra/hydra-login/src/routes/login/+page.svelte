@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import { page } from "$app/stores";
     import { goto } from "$app/navigation";
 
@@ -14,6 +15,42 @@
     $: {
         loginChallenge = $page.url.searchParams.get("login_challenge") || "";
     }
+
+    onMount(async () => {
+        try {
+            const sessionResponse = await fetch(
+                `${KRATOS_PUBLIC_URL}/sessions/whoami`,
+                {
+                    credentials: "include",
+                },
+            );
+            if (sessionResponse.ok) {
+                const session = await sessionResponse.json();
+                console.log("Existing session found...");
+                console.log(session);
+
+                const serverResponse = await fetch("/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        session,
+                        loginChallenge,
+                    }),
+                });
+
+                if (!serverResponse.ok) {
+                    throw new Error("Network response was not ok");
+                }
+
+                const { redirect_to } = await serverResponse.json();
+                window.location.href = redirect_to;
+            }
+        } catch (e) {
+            console.log("No existing session found.");
+        }
+    });
 
     const handleLogin = async () => {
         isLoading = true;
@@ -71,7 +108,6 @@
             }
 
             const result = await loginResponse.json();
-
             const { session } = result;
 
             const serverResponse = await fetch("/login", {
@@ -80,7 +116,6 @@
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    subject: identifier,
                     session,
                     loginChallenge,
                 }),

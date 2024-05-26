@@ -31,7 +31,6 @@ export const POST: RequestHandler = async ({ request }) => {
       remember: true,
       remember_for: 3600,
       identity_provider_session_id: session.id,
-      context: session.identity.traits,
     },
   );
 
