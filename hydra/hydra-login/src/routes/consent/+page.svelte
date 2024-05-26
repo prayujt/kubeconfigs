@@ -15,7 +15,8 @@
             console.log("Consent request information:");
             console.log(data);
             if (!data.message) {
-                consentRequest = data;
+                if (data.redirect_to) window.location.href = data.redirect_to;
+                else consentRequest = data;
             } else {
                 error = true;
             }
@@ -52,7 +53,7 @@
         <h1 class="text-2xl font-semibold text-gray-800">
             Prayuj Authentication
         </h1>
-        {#if loading}
+        {#if loading || (consentRequest && consentRequest.redirect_to)}
             <div class="flex justify-center items-center h-48">
                 <div
                     class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"
