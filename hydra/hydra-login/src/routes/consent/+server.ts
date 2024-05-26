@@ -52,6 +52,31 @@ export const GET: RequestHandler = async ({ url }) => {
     const { data: consentRequest } = await axios.get(
       `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent?consent_challenge=${consent_challenge}`,
     );
+
+    if (consentRequest.skip) {
+      console.log("Skipping consent form...");
+      const identityResponse = await axios.get(
+        `${KRATOS_ADMIN_URL}/admin/identities/${consentRequest.subject}`,
+      );
+      const traits = identityResponse.data.traits;
+      const { data: body } = await axios.put(
+        `${HYDRA_ADMIN_URL}/admin/oauth2/auth/requests/consent/accept?consent_challenge=${consent_challenge}`,
+        {
+          grant_scope: consentRequest.requested_scope,
+          grant_access_token_audience:
+            consentRequest.requested_access_token_audience,
+          session: buildSession(consentRequest.requested_scope, traits),
+          remember: true,
+          remember_for: 3600,
+        },
+      );
+
+      return new Response(JSON.stringify({ redirect_to: body.redirect_to }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify(consentRequest), {
       status: 200,
       headers: { "Content-Type": "application/json" },

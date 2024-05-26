@@ -12,6 +12,8 @@
         try {
             const res = await fetch(`/consent?consent_challenge=${challenge}`);
             const data = await res.json();
+            console.log("Consent request information:");
+            console.log(data);
             if (!data.message) {
                 consentRequest = data;
             } else {
