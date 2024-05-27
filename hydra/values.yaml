@@ -149,11 +149,6 @@ hydra:
     #   - "foo bar 123 456 lorem 1"
     #   - "foo bar 123 456 lorem 2"
     #   - "foo bar 123 456 lorem 3"
-    secrets:
-      system:
-        - secretName: hydra-secrets
-          secretKey: system-secret
-            # dsn: memory
     dsn: postgres://hydra_user:hydra_password@postgres:5432/hydra_db?sslmode=disable
 
     urls:
