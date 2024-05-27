@@ -8,12 +8,13 @@
     let password = "";
     let username = "";
     let isLoading = false;
+    let errorMessages: string[] = [];
 
-    const KRATOS_PUBLIC_URL =
-        process.env.KRATOS_PUBLIC_URL || "https://idp.prayujt.com";
+    const KRATOS_PUBLIC_URL = "https://idp.prayujt.com";
 
     const handleRegister = async () => {
         isLoading = true;
+        errorMessages = [];
         try {
             const initResponse = await fetch(
                 `${KRATOS_PUBLIC_URL}/self-service/registration/browser`,
@@ -68,6 +69,7 @@
             if (!registrationResponse.ok) {
                 const errorData = await registrationResponse.json();
                 console.error("Error completing registration", errorData);
+                extractErrorMessages(errorData);
                 throw new Error("Failed to complete registration");
             }
 
@@ -82,6 +84,14 @@
         }
     };
 
+    const extractErrorMessages = (errorData: any) => {
+        errorData.ui.nodes.forEach((node: any) => {
+            node.messages.forEach((message: any) => {
+                errorMessages.push(message.text);
+            });
+        });
+    };
+
     const loginRedirect = () => {
         const urlSearchParams = new URLSearchParams($page.url.search);
         const newUrl = `/login?${urlSearchParams.toString()}`;
@@ -94,6 +104,16 @@
         <h1 class="text-2xl font-semibold text-gray-800">
             Register with Prayuj Authentication
         </h1>
+        {#if errorMessages.length > 0}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Errors:</strong>
+                <ul class="list-disc list-inside mt-2">
+                    {#each errorMessages as errorMessage}
+                        <li>{errorMessage}</li>
+                    {/each}
+                </ul>
+            </div>
+        {/if}
         <form class="space-y-4" on:submit|preventDefault={handleRegister}>
             <div>
                 <label
