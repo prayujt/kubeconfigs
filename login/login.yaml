@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hydra-idp
-  namespace: hydra
+  name: sso-login
+  namespace: sso
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hydra-idp
+      app: sso-login
   template:
     metadata:
       labels:
-        app: hydra-idp
+        app: sso-login
     spec:
       containers:
-      - name: hydra-idp
-        image: docker.prayujt.com/hydra-login
+      - name: sso-login
+        image: docker.prayujt.com/sso-login
         ports:
         - containerPort: 3000
         env:
@@ -29,11 +29,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hydra-idp
-  namespace: hydra
+  name: sso-login
+  namespace: sso
 spec:
   selector:
-    app: hydra-idp
+    app: sso-login
   ports:
     - protocol: TCP
       port: 80
