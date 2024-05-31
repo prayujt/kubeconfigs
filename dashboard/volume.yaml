@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: dashboard-config-pv
+  namespace: dashboard
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/.dashboard
+    server: 192.168.86.100
+  storageClassName: dashboard-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dashboard-config-pvc
+  namespace: dashboard
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: dashboard-config-pv
+  storageClassName: dashboard-config
+
