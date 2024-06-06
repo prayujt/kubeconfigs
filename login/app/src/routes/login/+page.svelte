@@ -3,12 +3,15 @@
     import { page } from "$app/stores";
     import { goto } from "$app/navigation";
 
+    import headshot from "$lib/images/HEADSHOT.jpg";
+
     let identifier = "";
     let password = "";
     let isLoading = false;
     let loginChallenge = "";
     let errorMessage = "";
     let loading = true;
+    let isSignUpDisabled = true;
 
     const KRATOS_PUBLIC_URL = "https://idp.prayujt.com";
 
@@ -144,116 +147,61 @@
     };
 </script>
 
-<main class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
-        <h1 class="text-2xl font-semibold text-gray-800">
+<main class="bg-gray-50">
+    <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+        <img class="w-24 h-24 mb-5 rounded-lg" src={headshot} alt="Prayuj" />
+        <a href="" class="flex items-center mb-6 text-3xl font-heavy text-gray-900">
             Sign in with Prayuj Authentication
-        </h1>
-        {#if loading}
-            <div class="flex justify-center items-center h-48">
-                <div
-                    class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"
-                ></div>
-            </div>
-        {:else}
-            <form class="space-y-4" on:submit|preventDefault={handleLogin}>
-                {#if errorMessage}
-                    <div
-                        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-                        role="alert"
-                    >
-                        <strong class="font-bold">Error!</strong>
-                        <span class="block sm:inline"> {errorMessage}</span>
-                        <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                            <svg
-                                on:click={() => (errorMessage = "")}
-                                class="fill-current h-6 w-6 text-red-500"
-                                role="button"
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                ><title>Close</title><path
-                                    d="M14.348 5.652a.8.8 0 010 1.131L11.131 10l3.217 3.217a.8.8 0 11-1.131 1.131L10 11.131l-3.217 3.217a.8.8 0 11-1.131-1.131L8.869 10 5.652 6.783a.8.8 0 011.131-1.131L10 8.869l3.217-3.217a.8.8 0 011.131 0z"
-                                /></svg
-                            >
-                        </span>
+        </a>
+        <div class="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
+            <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+                <form class="space-y-4 md:space-y-6" on:submit|preventDefault={handleLogin}>
+                    <div>
+                        <label for="identifier" class="block mb-2 text-sm font-medium text-gray-900">Username or Email</label>
+                        <input
+                            class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
+                            id="identifier"
+                            type="identifier"
+                            placeholder="example@prayujt.com"
+                            bind:value={identifier}
+                        />
                     </div>
-                {/if}
-                <div>
-                    <label
-                        class="block text-gray-700 text-sm font-bold mb-2"
-                        for="identifier"
-                    >
-                        Username or Email
-                    </label>
-                    <input
-                        class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-                    focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                    disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-                    invalid:border-pink-500 invalid:text-pink-600
-                    focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
-                        id="identifier"
-                        type="identifier"
-                        placeholder="example@prayujt.com"
-                        bind:value={identifier}
-                    />
-                </div>
-                <div>
-                    <label
-                        class="block text-gray-700 text-sm font-bold mb-2"
-                        for="password"
-                    >
-                        Password
-                    </label>
-                    <input
-                        class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-                    focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                    disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none"
-                        id="password"
-                        type="password"
-                        placeholder="******************"
-                        bind:value={password}
-                    />
-                </div>
-                <div class="flex items-center justify-center">
+                    <div>
+                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900">Password</label>
+                        <input
+                            class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
+                            id="password"
+                            type="password"
+                            placeholder="******************"
+                            bind:value={password}
+                        />
+                    </div>
                     <button
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform hover:scale-105 active:scale-95"
+                        class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                         type="submit"
                         disabled={isLoading}
                     >
                         {#if isLoading}
                             <span>Signing In...</span>
-                            <div
-                                class="ml-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
-                            ></div>
+                            <div class="ml-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         {:else}
                             Sign In
                         {/if}
                     </button>
-                </div>
-                <div class="flex items-center justify-center mt-4">
-                    <a
-                        class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 cursor-pointer"
-                        on:click={() => registerRedirect()}
-                    >
-                        Don't have an account? Create one
-                    </a>
-                </div>
-            </form>
-        {/if}
+                    <div class="flex items-center justify-center">
+                        <a class="text-sm font-medium text-blue-600 hover:font-bold hover:cursor-not-allowed">Forgot password?</a>
+                    </div>
+                    <p class="text-sm font-light">
+                        Don’t have an account?
+                        <a
+                            class="font-medium text-blue-600 hover:cursor-not-allowed"
+                        >
+                            Sign up
+                        </a>
+                    </p>
+                </form>
+            </div>
+        </div>
     </div>
 </main>
 
-<style>
-    .loader {
-        border-top-color: #3490dc;
-        animation: spin 1s ease-in-out infinite;
-    }
-    @keyframes spin {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-</style>

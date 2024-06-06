@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { page } from "$app/stores";
+    import headshot from "$lib/images/HEADSHOT.jpg";
 
     let firstName = "";
     let lastName = "";
@@ -14,7 +15,8 @@
 
     const handleRegister = async () => {
         isLoading = true;
-        errorMessages = [];
+        errorMessages = ['Registration is not allowed at this time...'];
+        return;
         try {
             const initResponse = await fetch(
                 `${KRATOS_PUBLIC_URL}/self-service/registration/browser`,
@@ -99,133 +101,97 @@
     };
 </script>
 
-<main class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
-        <h1 class="text-2xl font-semibold text-gray-800">
+<main class="bg-gray-50">
+    <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+        <img class="w-24 h-24 mb-5 rounded-lg" src={headshot} alt="Prayuj" />
+        <a href="" class="flex items-center mb-6 text-3xl font-heavy text-gray-900">
             Register with Prayuj Authentication
-        </h1>
-        {#if errorMessages.length > 0}
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <strong class="font-bold">Errors:</strong>
-                <ul class="list-disc list-inside mt-2">
-                    {#each errorMessages as errorMessage}
-                        <li>{errorMessage}</li>
-                    {/each}
-                </ul>
+        </a>
+        <div class="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
+            <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+                {#if errorMessages.length > 0}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <strong class="font-bold">Errors:</strong>
+                        <ul class="list-disc list-inside mt-2">
+                            {#each errorMessages as errorMessage}
+                                <li>{errorMessage}</li>
+                            {/each}
+                        </ul>
+                    </div>
+                {/if}
+                <form class="space-y-4 md:space-y-6" on:submit|preventDefault={handleRegister}>
+                    <div>
+                        <label for="firstName" class="block mb-2 text-sm font-medium text-gray-900">First Name</label>
+                        <input
+                            class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
+                            id="firstName"
+                            type="text"
+                            placeholder="First Name"
+                            bind:value={firstName}
+                        />
+                    </div>
+                    <div>
+                        <label for="lastName" class="block mb-2 text-sm font-medium text-gray-900">Last Name</label>
+                        <input
+                            class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
+                            id="lastName"
+                            type="text"
+                            placeholder="Last Name"
+                            bind:value={lastName}
+                        />
+                    </div>
+                    <div>
+                        <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Email</label>
+                        <input
+                            class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
+                            id="email"
+                            type="email"
+                            placeholder="example@prayujt.com"
+                            bind:value={email}
+                        />
+                    </div>
+                    <div>
+                        <label for="username" class="block mb-2 text-sm font-medium text-gray-900">Username (optional)</label>
+                        <input
+                            class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
+                            id="username"
+                            type="text"
+                            placeholder="Username"
+                            bind:value={username}
+                        />
+                    </div>
+                    <div>
+                        <label for="password" class="block mb-2 text-sm font-medium text-gray-900">Password</label>
+                        <input
+                            class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5"
+                            id="password"
+                            type="password"
+                            placeholder="******************"
+                            bind:value={password}
+                        />
+                    </div>
+                    <button
+                        class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                        type="submit"
+                        disabled={isLoading}
+                    >
+                        {#if isLoading}
+                            <span>Registering...</span>
+                            <div class="ml-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        {:else}
+                            Register
+                        {/if}
+                    </button>
+                    <div class="flex items-center justify-center mt-4">
+                        <a
+                            class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 cursor-pointer"
+                            on:click={() => loginRedirect()}
+                        >
+                            Already have an account? Sign In
+                        </a>
+                    </div>
+                </form>
             </div>
-        {/if}
-        <form class="space-y-4" on:submit|preventDefault={handleRegister}>
-            <div>
-                <label
-                    class="block text-gray-700 text-sm font-bold mb-2"
-                    for="firstName"
-                >
-                    First Name
-                </label>
-                <input
-                    class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none"
-                    id="firstName"
-                    type="text"
-                    placeholder="First Name"
-                    bind:value={firstName}
-                />
-            </div>
-            <div>
-                <label
-                    class="block text-gray-700 text-sm font-bold mb-2"
-                    for="lastName"
-                >
-                    Last Name
-                </label>
-                <input
-                    class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none"
-                    id="lastName"
-                    type="text"
-                    placeholder="Last Name"
-                    bind:value={lastName}
-                />
-            </div>
-            <div>
-                <label
-                    class="block text-gray-700 text-sm font-bold mb-2"
-                    for="email"
-                >
-                    Email
-                </label>
-                <input
-                    class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none
-                invalid:border-pink-500 invalid:text-pink-600
-                focus:invalid:border-pink-500 focus:invalid:ring-pink-500"
-                    id="email"
-                    type="email"
-                    placeholder="example@prayujt.com"
-                    bind:value={email}
-                />
-            </div>
-            <div>
-                <label
-                    class="block text-gray-700 text-sm font-bold mb-2"
-                    for="username"
-                >
-                    Username (optional)
-                </label>
-                <input
-                    class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none"
-                    id="username"
-                    type="text"
-                    placeholder="Username"
-                    bind:value={username}
-                />
-            </div>
-            <div>
-                <label
-                    class="block text-gray-700 text-sm font-bold mb-2"
-                    for="password"
-                >
-                    Password
-                </label>
-                <input
-                    class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                disabled:bg-slate-50 disabled:text-slate-500 disabled:border-slate-200 disabled:shadow-none"
-                    id="password"
-                    type="password"
-                    placeholder="******************"
-                    bind:value={password}
-                />
-            </div>
-            <div class="flex items-center justify-center">
-                <button
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out transform hover:scale-105 active:scale-95"
-                    type="submit"
-                    disabled={isLoading}
-                >
-                    {#if isLoading}
-                        <span>Registering...</span>
-                        <div
-                            class="ml-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
-                        ></div>
-                    {:else}
-                        Register
-                    {/if}
-                </button>
-            </div>
-            <div class="flex items-center justify-center mt-4">
-                <a
-                    class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 cursor-pointer"
-                    on:click={() => loginRedirect()}
-                >
-                    Already have an account? Sign In
-                </a>
-            </div>
-        </form>
+        </div>
     </div>
 </main>

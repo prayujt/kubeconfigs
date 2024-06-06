@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import headshot from "$lib/images/HEADSHOT.jpg";
 
     let challenge = "";
     let consentRequest: any = undefined;
@@ -49,56 +50,55 @@
     };
 </script>
 
-<main class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-6 space-y-6">
-        <h1 class="text-2xl font-semibold text-gray-800">
+<main class="bg-gray-50">
+    <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+        <img class="w-24 h-24 mb-5 rounded-lg" src={headshot} alt="Prayuj" />
+        <a href="" class="flex items-center mb-6 text-3xl font-heavy text-gray-900">
             Prayuj Authentication
-        </h1>
-        {#if loading || (consentRequest && consentRequest.redirect_to)}
-            <div class="flex justify-center items-center h-48">
-                <div
-                    class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"
-                ></div>
+        </a>
+        <div class="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
+            <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+                {#if loading || (consentRequest && consentRequest.redirect_to)}
+                    <div class="flex justify-center items-center h-48">
+                        <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+                    </div>
+                {:else if error || !consentRequest}
+                    <div class="text-center text-red-600">
+                        <p class="text-lg font-semibold">
+                            Failed to load consent information
+                        </p>
+                        <p class="text-gray-600">
+                            Please try again later or contact Prayuj himself.
+                        </p>
+                    </div>
+                {:else}
+                    <p class="text-gray-600">
+                        <span class="font-medium">{consentRequest.client.client_name}</span> is requesting access to the following scopes:
+                    </p>
+                    <ul class="space-y-2">
+                        {#each consentRequest.requested_scope as scope}
+                            <li class="flex items-center p-2 bg-gray-100 border border-gray-200 rounded-lg shadow-sm">
+                                <span class="ml-2 text-gray-700">{scope}</span>
+                            </li>
+                        {/each}
+                    </ul>
+                    <div class="flex space-x-4">
+                        <button
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105 active:scale-95"
+                            on:click={() => handleConsent(true)}
+                        >
+                            Allow
+                        </button>
+                        <button
+                            class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-4 focus:ring-gray-300 transition-transform transform hover:scale-105 active:scale-95"
+                            on:click={() => handleConsent(false)}
+                        >
+                            Deny
+                        </button>
+                    </div>
+                {/if}
             </div>
-        {:else if error || !consentRequest}
-            <div class="text-center text-red-600">
-                <p class="text-lg font-semibold">
-                    Failed to load consent information
-                </p>
-                <p class="text-gray-600">
-                    Please try again later or contact Prayuj himself.
-                </p>
-            </div>
-        {:else}
-            <p class="text-gray-600">
-                <span class="font-medium"
-                    >{consentRequest.client.client_name}</span
-                > is requesting access to the following scopes:
-            </p>
-            <ul class="space-y-2">
-                {#each consentRequest.requested_scope as scope}
-                    <li
-                        class="flex items-center p-2 bg-gray-100 border border-gray-200 rounded-lg shadow-sm"
-                    >
-                        <span class="ml-2 text-gray-700">{scope}</span>
-                    </li>
-                {/each}
-            </ul>
-            <div class="flex space-x-4">
-                <button
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-transform transform hover:scale-105 active:scale-95"
-                    on:click={() => handleConsent(true)}
-                >
-                    Allow
-                </button>
-                <button
-                    class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-transform transform hover:scale-105 active:scale-95"
-                    on:click={() => handleConsent(false)}
-                >
-                    Deny
-                </button>
-            </div>
-        {/if}
+        </div>
     </div>
 </main>
 

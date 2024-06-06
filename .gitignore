@@ -2,3 +2,4 @@
 **/secrets.yaml
 **/docker-data
 **/configmap.yaml
+.DS_Store
