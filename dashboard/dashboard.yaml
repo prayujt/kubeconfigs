@@ -20,7 +20,7 @@ spec:
         - containerPort: 8080
         volumeMounts:
         - name: config-volume
-          mountPath: /user-data
+          mountPath: /app/user-data
       volumes:
       - name: config-volume
         persistentVolumeClaim:
