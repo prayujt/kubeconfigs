@@ -13,6 +13,13 @@ spec:
       labels:
         app: pihole
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: "server-master"
+      tolerations:
+        - key: "master"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
       containers:
       - name: pihole
         image: pihole/pihole:latest
@@ -32,6 +39,8 @@ spec:
         env:
         - name: TZ
           value: "America/New_York"
+        - name: CORS_HOSTS
+          value: "dns.prayujt.com,prayujt.com"
         - name: WEBPASSWORD
           valueFrom:
             secretKeyRef:

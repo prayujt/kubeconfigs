@@ -18,8 +18,9 @@ controller:
   replicas: 2
 
 image:
-  tag: v1.98.1
-    #tag: latest
+  #tag: v1.98.1
+  #tag: v1.105.1
+  tag: release
 
 immich:
   persistence:
