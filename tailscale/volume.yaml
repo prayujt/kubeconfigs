@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tailscale-config
+  namespace: vpn
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/.tailscale
+    server: 192.168.86.100
+  storageClassName: tailscale-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tailscale-config
+  namespace: vpn
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: tailscale-config
+  storageClassName: tailscale-config

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: headscale
+  namespace: vpn
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: headscale
+  template:
+    metadata:
+      labels:
+        app: headscale
+    spec:
+      containers:
+        - name: headscale
+          image: headscale/headscale:0.23.0-alpha12-debug
+          args: ["serve"]
+          ports:
+            - containerPort: 8080
+              name: web
+            - containerPort: 9090
+              name: metrics
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/headscale
+      volumes:
+        - name: config-volume
+          persistentVolumeClaim:
+            claimName: tailscale-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: headscale
+  namespace: vpn
+spec:
+  selector:
+    app: headscale
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      name: web
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+      name: metrics
+  type: ClusterIP
