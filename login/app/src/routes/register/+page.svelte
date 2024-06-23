@@ -15,8 +15,8 @@
 
     const handleRegister = async () => {
         isLoading = true;
-        // errorMessages = ['Registration is not allowed at this time...'];
-        // return;
+        errorMessages = [];
+
         try {
             const initResponse = await fetch(
                 `${KRATOS_PUBLIC_URL}/self-service/registration/browser`,
@@ -87,11 +87,16 @@
     };
 
     const extractErrorMessages = (errorData: any) => {
-        errorData.ui.nodes.forEach((node: any) => {
-            node.messages.forEach((message: any) => {
-                errorMessages.push(message.text);
+        errorMessages = [];
+        if (errorData.ui && errorData.ui.nodes) {
+            errorData.ui.nodes.forEach((node: any) => {
+                if (node.messages && node.messages.length > 0) {
+                    node.messages.forEach((message: any) => {
+                        errorMessages.push(message.text);
+                    });
+                }
             });
-        });
+        }
     };
 
     const loginRedirect = () => {
@@ -103,7 +108,7 @@
 
 <main class="bg-gray-50">
     <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <!-- <img class="w-24 h-24 mb-5 rounded-lg" src={headshot} alt="Prayuj" /> -->
+        <img class="w-24 h-24 mb-5 rounded-lg" src={headshot} alt="Prayuj" />
         <a href="" class="flex items-center mb-6 text-3xl font-heavy text-gray-900">
             Register with Prayuj Authentication
         </a>
