@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: tailscale-config
+  name: headscale-config
   namespace: vpn
 spec:
   capacity:
@@ -9,14 +9,14 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.tailscale
+    path: /home/files/.headscale
     server: 192.168.86.100
-  storageClassName: tailscale-config
+  storageClassName: headscale-config
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: tailscale-config
+  name: headscale-config
   namespace: vpn
 spec:
   accessModes:
@@ -24,5 +24,5 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  volumeName: tailscale-config
-  storageClassName: tailscale-config
+  volumeName: headscale-config
+  storageClassName: headscale-config

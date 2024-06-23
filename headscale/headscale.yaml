@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: headscale
-          image: headscale/headscale:0.23.0-alpha12-debug
+          image: headscale/headscale:0.23.0-alpha9
           args: ["serve"]
           ports:
             - containerPort: 8080
@@ -28,7 +28,7 @@ spec:
       volumes:
         - name: config-volume
           persistentVolumeClaim:
-            claimName: tailscale-config
+            claimName: headscale-config
 ---
 apiVersion: v1
 kind: Service
