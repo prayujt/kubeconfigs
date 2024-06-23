@@ -16,7 +16,7 @@ spec:
       containers:
       - name: affine
         #image: ghcr.io/toeverything/affine-graphql:stable-cccea3e
-        image: ghcr.io/toeverything/affine-graphql:canary
+        image: ghcr.io/toeverything/affine-graphql:stable
         command: ["sh", "-c", "node ./scripts/self-host-predeploy && node ./dist/index.js"]
         ports:
         - containerPort: 3010
