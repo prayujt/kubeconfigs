@@ -15,8 +15,8 @@
 
     const handleRegister = async () => {
         isLoading = true;
-        errorMessages = ['Registration is not allowed at this time...'];
-        return;
+        // errorMessages = ['Registration is not allowed at this time...'];
+        // return;
         try {
             const initResponse = await fetch(
                 `${KRATOS_PUBLIC_URL}/self-service/registration/browser`,
@@ -103,7 +103,7 @@
 
 <main class="bg-gray-50">
     <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <img class="w-24 h-24 mb-5 rounded-lg" src={headshot} alt="Prayuj" />
+        <!-- <img class="w-24 h-24 mb-5 rounded-lg" src={headshot} alt="Prayuj" /> -->
         <a href="" class="flex items-center mb-6 text-3xl font-heavy text-gray-900">
             Register with Prayuj Authentication
         </a>
@@ -171,9 +171,10 @@
                         />
                     </div>
                     <button
-                        class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                        class="w-full flex items-center justify-center text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                         type="submit"
                         disabled={isLoading}
+                        style="min-width: 120px;"
                     >
                         {#if isLoading}
                             <span>Registering...</span>
