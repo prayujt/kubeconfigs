@@ -4,21 +4,16 @@ metadata:
   name: auth-ingress
   namespace: hydra
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/client-max-body-size: "2g"
-    nginx.ingress.kubernetes.io/proxy-body-size: "2g"
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      set $cors_origin '';
-      if ($http_origin ~* (https?://(?:.*\.)?prayujt\.com(:[0-9]+)?)$) {
-          set $cors_origin $http_origin;
-      }
-      more_set_headers 'Access-Control-Allow-Origin: $cors_origin';
-      more_set_headers 'Access-Control-Allow-Methods: GET, POST, OPTIONS';
-      more_set_headers 'Access-Control-Allow-Headers: Authorization, Cookie, Origin, Content-Type, Accept, X-Csrf-Token';
-      more_set_headers 'Access-Control-Expose-Headers: Content-Type, Set-Cookie';
-      more_set_headers 'Access-Control-Allow-Credentials: true';
+
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Csrf-Token"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Type, Set-Cookie"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.prayujt.com"
 spec:
   tls:
   - hosts:
