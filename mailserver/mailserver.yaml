@@ -36,8 +36,10 @@ spec:
           value: "ldaps://mail.prayujt.com"
         - name: OVERRIDE_HOSTNAME
           value: "mail.prayujt.com"
+        - name: POSTFIX_REJECT_UNKNOWN_CLIENT_HOSTNAME
+          value: "1"
         - name: PERMIT_DOCKER
-          value: "connected-networks"
+          value: "none"
         - name: TLS_LEVEL
           value: "intermediate"
         volumeMounts:
