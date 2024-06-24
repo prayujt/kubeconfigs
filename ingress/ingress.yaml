@@ -39,6 +39,13 @@ spec:
         app.kubernetes.io/part-of: ingress-nginx
         app.kubernetes.io/version: 1.10.1
     spec:
+      volumes:
+      - name: matrix-client-config
+        configMap:
+          name: matrix-client-config
+      - name: webhook-cert
+        secret:
+          secretName: ingress-nginx-admission
       containers:
       - args:
         - /nginx-ingress-controller
@@ -120,15 +127,14 @@ spec:
         - mountPath: /usr/local/certificates/
           name: webhook-cert
           readOnly: true
+        - mountPath: /etc/nginx/client
+          name: matrix-client-config
+          readOnly: true
       dnsPolicy: ClusterFirst
       nodeSelector:
         kubernetes.io/os: linux
       serviceAccountName: ingress-nginx
       terminationGracePeriodSeconds: 300
-      volumes:
-      - name: webhook-cert
-        secret:
-          secretName: ingress-nginx-admission
 ---
 apiVersion: v1
 kind: Service

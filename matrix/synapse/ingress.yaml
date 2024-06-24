@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  namespace: matrix
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - matrix.prayujt.com
+      secretName: matrix-prayujt-com-tls
+  rules:
+    - host: matrix.prayujt.com
+      http:
+        paths:
+          - pathType: Prefix
+            path: /_matrix
+            backend:
+              service:
+                name: synapse-server
+                port:
+                  number: 8008
+          - pathType: Prefix
+            path: /_synapse/client
+            backend:
+              service:
+                name: synapse-server
+                port:
+                  number: 8008
+          - pathType: Prefix
+            path: /client/
+            backend:
+              service:
+                name: sliding-sync
+                port:
+                  number: 8009
+          - pathType: Prefix
+            path: /_matrix/client/unstable/org.matrix.msc3575/sync
+            backend:
+              service:
+                name: sliding-sync
+                port:
+                  number: 8009

@@ -1,26 +1,25 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: jellyfin-ingress
-  namespace: jellyfin
+  name: chat-ingress
+  namespace: matrix
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/proxy-body-size: 2g
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   tls:
   - hosts:
-    - tv.prayujt.com
-    secretName: tv-prayujt-certs
+    - chat.prayujt.com
+    secretName: chat-prayujt-certs
   rules:
-  - host: tv.prayujt.com
+  - host: chat.prayujt.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: jellyfin
+            name: element
             port:
-              number: 8096
+              number: 80

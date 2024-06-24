@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: immich-ingress
+  namespace: immich
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/client-body-buffer-size: "2g"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+       proxy_set_header Upgrade "websocket";
+       proxy_set_header Connection "Upgrade";
+spec:
+  tls:
+  - hosts:
+    - photos.prayujt.com
+    secretName: photos-prayujt-certs
+  rules:
+  - host: photos.prayujt.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: immich-server
+            port:
+              number: 3001

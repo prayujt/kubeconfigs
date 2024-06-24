@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: airsonic-ingress
+  namespace: airsonic
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+       proxy_set_header Upgrade "websocket";
+       proxy_set_header Connection "Upgrade";
+spec:
+  tls:
+  - hosts:
+    - music.prayujt.com
+    secretName: music-prayujt-certs
+  rules:
+  - host: music.prayujt.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: airsonic
+            port:
+              number: 4040

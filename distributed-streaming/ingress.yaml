@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: distributed-streaming-ingress
+  namespace: distributed-streaming
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - distributed-streaming.prayujt.com
+    secretName: distributed-streaming-prayujt-com-certs
+  rules:
+  - host: distributed-streaming.prayujt.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: distributed-streaming
+            port:
+              number: 8080
