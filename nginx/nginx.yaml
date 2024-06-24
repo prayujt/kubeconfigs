@@ -41,6 +41,7 @@ spec:
               mountPath: /var/www/temp
       containers:
         - name: nginx-container
+          #image: bitnami/nginx
           image: ubuntu/nginx
           volumeMounts:
             - name: nginx-config-volume
@@ -105,5 +106,10 @@ spec:
       port: 8448
       targetPort: 8448
       nodePort: 10003
+    - name: nginx-mysql
+      protocol: TCP
+      port: 3306
+      targetPort: 3306
+      nodePort: 10004
   type: NodePort
 
