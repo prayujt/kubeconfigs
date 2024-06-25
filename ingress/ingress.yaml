@@ -46,6 +46,7 @@ spec:
       - name: webhook-cert
         secret:
           secretName: ingress-nginx-admission
+            #hostNetwork: true
       containers:
       - args:
         - /nginx-ingress-controller
@@ -142,6 +143,7 @@ metadata:
   name: ingress-nginx-controller
   namespace: ingress-nginx
 spec:
+  #externalTrafficPolicy: Local
   type: NodePort
   selector:
     app.kubernetes.io/name: ingress-nginx

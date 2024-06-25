@@ -13,13 +13,13 @@ spec:
       labels:
         app: pihole
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: "server-master"
-      tolerations:
-        - key: "master"
-          operator: "Equal"
-          value: "true"
-          effect: "NoSchedule"
+      #nodeSelector:
+      #  kubernetes.io/hostname: "server-master"
+      #tolerations:
+      #  - key: "master"
+      #    operator: "Equal"
+      #    value: "true"
+      #    effect: "NoSchedule"
       containers:
       - name: pihole
         image: pihole/pihole:latest
@@ -103,5 +103,3 @@ spec:
       port: 80
       targetPort: 80
       protocol: TCP
-
-        

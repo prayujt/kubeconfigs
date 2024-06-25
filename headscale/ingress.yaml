@@ -22,4 +22,3 @@ spec:
             name: headscale
             port:
               number: 8080
-
