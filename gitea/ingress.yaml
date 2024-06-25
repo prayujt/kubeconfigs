@@ -1,24 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: portainer-ingress
-  namespace: portainer
+  name: gitea-ingress
+  namespace: gitea
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   tls:
   - hosts:
-    - cluster.prayujt.com
-    secretName: cluster-prayujt-certs
+    - git.prayujt.com
+    secretName: git-prayujt-com-certs
   rules:
-  - host: cluster.prayujt.com
+  - host: git.prayujt.com
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: portainer
+            name: gitea-http
             port:
-              number: 9000
+              number: 3000
