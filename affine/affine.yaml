@@ -15,7 +15,6 @@ spec:
     spec:
       containers:
       - name: affine
-        #image: ghcr.io/toeverything/affine-graphql:stable-cccea3e
         image: ghcr.io/toeverything/affine-graphql:stable
         command: ["sh", "-c", "node ./scripts/self-host-predeploy && node ./dist/index.js"]
         ports:
@@ -42,6 +41,8 @@ spec:
         - name: DATABASE_URL
           value: postgres://affine:affine@affine-postgres.affine.svc.cluster.local:5432/affine
         - name: NODE_ENV
+          value: production
+        - name: AFFINE_ENV
           value: production
         - name: AFFINE_ADMIN_EMAIL
           valueFrom:
