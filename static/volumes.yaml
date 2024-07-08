@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: static-nginx-config
+  namespace: static
+spec:
+  capacity:
+    storage: 1Mi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/Static/config
+    server: 192.168.86.100
+  storageClassName: static-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: static-nginx-config
+  namespace: static
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Mi
+  volumeName: static-nginx-config
+  storageClassName: static-config
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: static-nginx-content
+  namespace: static
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /home/files/Static/content
+    server: 192.168.86.100
+  storageClassName: static-content
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: static-nginx-content
+  namespace: static
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: static-nginx-content
+  storageClassName: static-content

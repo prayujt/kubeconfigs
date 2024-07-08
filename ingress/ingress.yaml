@@ -39,6 +39,13 @@ spec:
         app.kubernetes.io/part-of: ingress-nginx
         app.kubernetes.io/version: 1.10.1
     spec:
+      hostNetwork: true
+      tolerations:
+      - key: "master"
+        operator: "Exists"
+        effect: "PreferNoSchedule"
+      nodeSelector:
+        kubernetes.io/hostname: server-master
       volumes:
       - name: matrix-client-config
         configMap:
@@ -46,7 +53,6 @@ spec:
       - name: webhook-cert
         secret:
           secretName: ingress-nginx-admission
-            #hostNetwork: true
       containers:
       - args:
         - /nginx-ingress-controller
@@ -143,16 +149,13 @@ metadata:
   name: ingress-nginx-controller
   namespace: ingress-nginx
 spec:
-  #externalTrafficPolicy: Local
-  type: NodePort
+  type: ClusterIP
   selector:
     app.kubernetes.io/name: ingress-nginx
   ports:
   - name: http
     port: 80
     targetPort: 80
-    nodePort: 10000
   - name: https
     port: 443
     targetPort: 443
-    nodePort: 10001

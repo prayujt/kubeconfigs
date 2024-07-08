@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prayujt-matrix-ingress
+  namespace: static
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /matrix/server.json
+spec:
+  tls:
+  - hosts:
+    - prayujt.com
+    secretName: prayujt-com-certs
+  rules:
+  - host: prayujt.com
+    http:
+      paths:
+      - pathType: ImplementationSpecific
+        path: /.well-known/matrix/server
+        backend:
+          service:
+            name: static-service
+            port:
+              number: 80

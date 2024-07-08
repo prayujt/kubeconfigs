@@ -13,13 +13,13 @@ spec:
       labels:
         app: pihole
     spec:
-      #nodeSelector:
-      #  kubernetes.io/hostname: "server-master"
-      #tolerations:
-      #  - key: "master"
-      #    operator: "Equal"
-      #    value: "true"
-      #    effect: "NoSchedule"
+      hostNetwork: true
+      tolerations:
+      - key: "master"
+        operator: "Exists"
+        effect: "PreferNoSchedule"
+      nodeSelector:
+        kubernetes.io/hostname: server-master
       containers:
       - name: pihole
         image: pihole/pihole:latest
@@ -33,7 +33,7 @@ spec:
         - containerPort: 67
           name: dhcp
           protocol: UDP
-        - containerPort: 80
+        - containerPort: 8001
           name: web
           protocol: TCP
         env:
@@ -41,6 +41,8 @@ spec:
           value: "America/New_York"
         - name: CORS_HOSTS
           value: "dns.prayujt.com,prayujt.com"
+        - name: WEB_PORT
+          value: "8001"
         - name: WEBPASSWORD
           valueFrom:
             secretKeyRef:
@@ -66,10 +68,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: pihole-nodeports
+  name: pihole-dns
   namespace: pihole
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: pihole
   ports:
@@ -77,17 +79,14 @@ spec:
       port: 53
       targetPort: 53
       protocol: TCP
-      nodePort: 53
     - name: dns-udp
       port: 53
       targetPort: 53
       protocol: UDP
-      nodePort: 53
     - name: dhcp
       port: 67
       targetPort: 67
       protocol: UDP
-      nodePort: 67
 ---
 apiVersion: v1
 kind: Service
@@ -100,6 +99,6 @@ spec:
     app: pihole
   ports:
     - name: web
-      port: 80
-      targetPort: 80
+      port: 8001
+      targetPort: 8001
       protocol: TCP
