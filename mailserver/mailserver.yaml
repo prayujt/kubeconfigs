@@ -14,6 +14,7 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: "server-master"
+      hostNetwork: true
       containers:
       - name: mailserver
         image: ghcr.io/docker-mailserver/docker-mailserver:latest
@@ -85,37 +86,37 @@ spec:
         hostPath:
           path: /etc/localtime
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: mailserver-service
-spec:
-  type: NodePort
-  selector:
-    app: mailserver
-  ports:
-    - name: smtp
-      protocol: TCP
-      port: 25
-      targetPort: 25
-      nodePort: 25
-    - name: imap
-      protocol: TCP
-      port: 143
-      targetPort: 143
-      nodePort: 143
-    - name: esmtp-implicit-tls
-      protocol: TCP
-      port: 465
-      targetPort: 465
-      nodePort: 465
-    - name: esmtp-explicit-tls
-      protocol: TCP
-      port: 587
-      targetPort: 587
-      nodePort: 587
-    - name: imap4-implicit-tls
-      protocol: TCP
-      port: 993
-      targetPort: 993
-      nodePort: 993
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: mailserver-service
+#spec:
+#  type: NodePort
+#  selector:
+#    app: mailserver
+#  ports:
+#    - name: smtp
+#      protocol: TCP
+#      port: 25
+#      targetPort: 25
+#      nodePort: 25
+#    - name: imap
+#      protocol: TCP
+#      port: 143
+#      targetPort: 143
+#      nodePort: 143
+#    - name: esmtp-implicit-tls
+#      protocol: TCP
+#      port: 465
+#      targetPort: 465
+#      nodePort: 465
+#    - name: esmtp-explicit-tls
+#      protocol: TCP
+#      port: 587
+#      targetPort: 587
+#      nodePort: 587
+#    - name: imap4-implicit-tls
+#      protocol: TCP
+#      port: 993
+#      targetPort: 993
+#      nodePort: 993

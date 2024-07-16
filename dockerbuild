@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e  # Exit immediately if a command exits with a non-zero status
+
+# Function to prompt for confirmation
+confirm() {
+    read -r -p "$1 [y/N] " response
+    case "$response" in
+        [yY][eE][sS]|[yY]) 
+            true
+            ;;
+        *)
+            false
+            ;;
+    esac
+}
+
+# Check if argument is provided
+if [ -z "$1" ]; then
+    echo "Usage: $0 <image_name>"
+    exit 1
+fi
+
+image_name="$1"
+
+# Display commands to be executed
+echo "Commands to be executed:"
+echo "docker build -t '$image_name' ."
+echo "docker tag '$image_name' docker.prayujt.com/'$image_name'"
+echo "docker push docker.prayujt.com/'$image_name'"
+
+# Prompt for confirmation
+if confirm "Do you want to run these commands?"; then
+    # Run commands using current directory (.)
+    docker build -t "$image_name" .
+    docker tag "$image_name" docker.prayujt.com/"$image_name"
+    docker push docker.prayujt.com/"$image_name"
+else
+    echo "Aborted."
+    exit 1
+fi
+
+echo "Commands executed successfully."
+

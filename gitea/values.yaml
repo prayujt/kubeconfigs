@@ -134,12 +134,12 @@ service:
   ## @param service.ssh.annotations SSH service annotations
   ## @param service.ssh.labels SSH service additional labels
   ssh:
-    type: NodePort
+    type: ClusterIP
     port: 2222
     clusterIP: None
     loadBalancerIP:
-    nodePort: 10002
-    externalTrafficPolicy: 'Local'
+    nodePort:
+    externalTrafficPolicy:
     externalIPs:
     ipFamilyPolicy:
     ipFamilies:
