@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: proxy-ingress
+  namespace: hydra
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/client-max-body-size: "2g"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, PUT, POST, DELETE, PATCH, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,X-Csrf-Token"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Type, Set-Cookie"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://*.prayujt.com"
+spec:
+  tls:
+  - hosts:
+    - proxy.prayujt.com
+    secretName: proxy-prayujt-certs
+  rules:
+  - host: proxy.prayujt.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: proxy
+            port:
+              number: 4180

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy
+  namespace: hydra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proxy
+  template:
+    metadata:
+      labels:
+        app: proxy
+    spec:
+      containers:
+      - name: proxy
+        image: quay.io/oauth2-proxy/oauth2-proxy:v7.2.1
+        args:
+        - --provider=oidc
+        - --oidc-issuer-url=https://auth.prayujt.com
+        - --client-id=28af4c8c-fec9-45a9-a35f-f756f43b72c0
+        - --client-secret=~oM9P-Cm_n6l_5WzKBA4IX3nR-
+        - --cookie-secret=L4nCd4qd4oZLHMGwj5a1PUrK4J2wSGlwAUAKiVeYJ5A=
+        - --email-domain=*
+        - --pass-authorization-header=true
+        - --pass-access-token=true
+        - --cookie-domain=.prayujt.com
+        - --whitelist-domain=.prayujt.com
+        - --http-address=0.0.0.0:4180
+        ports:
+        - containerPort: 4180
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxy
+  namespace: hydra
+spec:
+  ports:
+  - port: 4180
+    targetPort: 4180
+    protocol: TCP
+  selector:
+    app: proxy

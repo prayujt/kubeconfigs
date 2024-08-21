@@ -5,7 +5,7 @@ metadata:
   namespace: immich
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/client-body-buffer-size: "2g"
+    nginx.ingress.kubernetes.io/proxy-body-size: "5g"
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   tls:

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calendar-frontend
+  namespace: calendar
+  labels:
+    app: calendar-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calendar-frontend
+  template:
+    metadata:
+      labels:
+        app: calendar-frontend
+    spec:
+      containers:
+        - name: calendar-frontend
+          image: docker.prayujt.com/calendar-frontend
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: calendar-frontend
+  namespace: calendar
+  labels:
+    app: calendar-frontend
+spec:
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: calendar-frontend
+  type: ClusterIP
