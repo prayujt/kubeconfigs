@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mindsdb
+  namespace: db
+  labels:
+    app: mindsdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mindsdb
+  template:
+    metadata:
+      labels:
+        app: mindsdb
+    spec:
+      containers:
+      - name: mindsdb
+        image: mindsdb/mindsdb:latest
+        ports:
+        - containerPort: 47334
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /root/mindsdb_config.json
+          subPath: mdb_config.json
+        env:
+        - name: MINDSDB_PROJECT
+          value: "test_project" 
+        - name: MINDSDB_DB_HOST
+          value: ""
+        - name: MINDSDB_DB_PORT
+          value: "3306"
+        - name: MINDSDB_DB_USER
+          value: "root"
+        - name: MINDSDB_DB_PASSWORD
+          value: ""
+      volumes:
+      - name: config-volume
+        configMap:
+          name: mindsdb-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mindsdb
+  namespace: db
+  labels:
+    app: mindsdb
+spec:
+  type: ClusterIP
+  selector:
+    app: mindsdb
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 47334

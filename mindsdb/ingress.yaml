@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mindsdb-ingress
+  namespace: db
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 1g
+      #nginx.ingress.kubernetes.io/auth-url: "https://idp.prayujt.com/sessions/whoami"
+      #nginx.ingress.kubernetes.io/auth-signin: "https://proxy.prayujt.com/oauth2/start?rd=$scheme://$host$request_uri"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels:
+    app: mindsdb
+spec:
+  rules:
+    - host: mindsdb.prayujt.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mindsdb
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - mindsdb.prayujt.com
+      secretName: mindsdb-tls
