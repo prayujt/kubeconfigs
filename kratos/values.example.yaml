@@ -25,6 +25,9 @@ kratos:
           ui_url: https://login.prayujt.com/register
     oauth2_provider:
       url: http://hydra-admin.hydra.svc.cluster.local:4445
+    courier:
+      smtp:
+        connection_uri: "smtps://username:password@prayujt.com:465/?skip_ssl_verify=false"
   automigration:
     enabled: true
   identitySchemas:
@@ -74,6 +77,12 @@ kratos:
               "lastName": {
                 "type": "string",
                 "title": "Last Name"
+              },
+              "avatar": {
+                "type": "string",
+                "format": "uri",
+                "title": "Avatar",
+                "description": "A URL pointing to the location of the user's avatar"
               }
             },
             "required": [

@@ -3,3 +3,4 @@
 **/docker-data
 **/configmap.yaml
 .DS_Store
+kratos/values.yaml
