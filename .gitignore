@@ -4,3 +4,4 @@
 **/configmap.yaml
 .DS_Store
 kratos/values.yaml
+cloud/
