@@ -4,4 +4,6 @@
 **/configmap.yaml
 .DS_Store
 kratos/values.yaml
-cloud/
+cloud/psql-public.yaml
+cloud/psql-public-volume.yaml
+
