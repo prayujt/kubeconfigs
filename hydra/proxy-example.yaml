@@ -19,9 +19,9 @@ spec:
         args:
         - --provider=oidc
         - --oidc-issuer-url=https://auth.prayujt.com
-        - --client-id=28af4c8c-fec9-45a9-a35f-f756f43b72c0
-        - --client-secret=~oM9P-Cm_n6l_5WzKBA4IX3nR-
-        - --cookie-secret=L4nCd4qd4oZLHMGwj5a1PUrK4J2wSGlwAUAKiVeYJ5A=
+        - --client-id=
+        - --client-secret=
+        - --cookie-secret=
         - --email-domain=*
         - --pass-authorization-header=true
         - --pass-access-token=true
