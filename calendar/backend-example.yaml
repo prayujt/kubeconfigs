@@ -21,8 +21,10 @@ spec:
           ports:
             - containerPort: 8080
           env:
-          - name: POSTGRES_URL
-            value: "postgresql://postgres@postgres.cloud.svc.cluster.local:5432/calendar"
+          - name: DATABASE_URL
+            value: "postgresql://prayuj@postgres.cloud.svc.cluster.local:5432/calendar"
+          - name: OPENAI_API_KEY
+            value: "<OPENAI_API_KEY>"
 ---
 apiVersion: v1
 kind: Service
