@@ -45,6 +45,7 @@
 
                 if (!serverResponse.ok) {
                     throw new Error("Network response was not ok");
+                    errorMessage = "Found existing session, but could not automatically log you in";
                 }
 
                 const { redirect_to } = await serverResponse.json();
