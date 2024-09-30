@@ -16,6 +16,7 @@
     const handleRegister = async () => {
         isLoading = true;
         errorMessages = [];
+        errorMessages = ['Nice try, signing up isn\'t allowed. Please ask Prayuj for permission.']
 
         try {
             const initResponse = await fetch(
@@ -81,6 +82,7 @@
             loginRedirect();
         } catch (e: any) {
             console.log("Registration error:", e);
+            errorMessages.push('Something went wrong. Please try again later.');
         } finally {
             isLoading = false;
         }

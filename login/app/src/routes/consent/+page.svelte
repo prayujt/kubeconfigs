@@ -1,11 +1,12 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import headshot from "$lib/images/HEADSHOT.jpg";
+    import { type User, user } from "$lib/stores";
 
     let challenge = "";
     let consentRequest: any = undefined;
     let loading = true;
     let error = false;
+    let isLoaded = false;
 
     onMount(async () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -27,6 +28,18 @@
         } finally {
             loading = false;
         }
+        const response = await fetch(`https://idp.prayujt.com/sessions/whoami`, {
+            credentials: 'include',
+        });
+
+        const res = await response.json();
+        user.set({
+            id: res.identity.id,
+            name: `${res.identity.traits.firstName} ${res.identity.traits.lastName}`,
+            email: res.identity.traits.email,
+            username: res.identity.traits.username,
+            avatar: res.identity.traits.avatar,
+        } as User);
     });
 
     const handleConsent = async (granted: boolean) => {
@@ -52,7 +65,40 @@
 
 <main class="bg-gray-50">
     <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <img class="w-24 h-24 mb-5 rounded-lg" src={headshot} alt="Prayuj" />
+        {#if $user}
+            {#if $user.avatar}
+                {#if !isLoaded}
+                    <div class="w-24 h-24 rounded-full bg-gray-300 animate-pulse"></div>
+                {/if}
+                <img
+                    class="w-24 h-24 rounded-full transition-opacity duration-100 ease-in-out"
+                    src={$user.avatar}
+                    alt="User Avatar"
+                    on:load={() => isLoaded = true}
+                    class:animate-pulse={!isLoaded}
+                    style:display={isLoaded ? 'block' : 'none'}
+                />
+            {:else}
+                <div class="flex items-center justify-center bg-gray-300 rounded-full w-24 h-24 text-3xl text-gray-800">
+                    {#if $user.name}
+                        {#each $user.name.split(" ").slice(0, 2) as part}
+                            {part.charAt(0).toUpperCase()}
+                        {/each}
+                    {/if}
+                </div>
+            {/if}
+            <div class="flex flex-col mt-4 items-center">
+                <p class="text-xl">Welcome back</p>
+                <h1 class="mb-4 text-2xl font-semibold text-gray-900">
+                    {#if $user.name}
+                        {$user.name}
+                    {:else}
+                        {$user.username}
+                    {/if}
+                </h1>
+            </div>
+        {/if}
+
         <a href="" class="flex items-center mb-6 text-3xl font-heavy text-gray-900">
             Prayuj Authentication
         </a>
@@ -84,13 +130,13 @@
                     </ul>
                     <div class="flex space-x-4">
                         <button
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105 active:scale-95"
+                            class="w-full flex items-center justify-center text-white bg-blue-600 hover:bg-blue-700 focus:outline-none font-medium rounded-lg text-sm text-center px-5 py-2.5"
                             on:click={() => handleConsent(true)}
                         >
                             Allow
                         </button>
                         <button
-                            class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 rounded-lg focus:outline-none focus:ring-4 focus:ring-gray-300 transition-transform transform hover:scale-105 active:scale-95"
+                            class="w-full flex items-center justify-center text-white bg-gray-600 hover:bg-gray-700 focus:outline-none font-medium rounded-lg text-sm text-center px-5 py-2.5"
                             on:click={() => handleConsent(false)}
                         >
                             Deny
