@@ -25,6 +25,10 @@ spec:
             value: "postgresql://prayuj@postgres.cloud.svc.cluster.local:5432/calendar"
           - name: OPENAI_API_KEY
             value: "<OPENAI_API_KEY>"
+          - name: ENVIRONMENT
+            value: "production"
+          - name: MAIL_PASSWORD
+            value: "<MAIL_PASSWORD>"
 ---
 apiVersion: v1
 kind: Service

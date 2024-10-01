@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+
+metadata:
+  name: mail-prayujt-tls
+
+spec:
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  secretName: mail-prayujt-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  commonName: mail.prayujt.com
+  dnsNames:
+  - mail.prayujt.com
