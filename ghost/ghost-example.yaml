@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ghost
+  namespace: ghost
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ghost
+  template:
+    metadata:
+      labels:
+        app: ghost
+    spec:
+      containers:
+        - name: ghost
+          image: ghost:alpine
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: database__client
+              value: "mysql"
+            - name: database__connection__host
+              value: ""
+            - name: database__connection__user
+              value: ""
+            - name: database__connection__password
+              value: ""
+            - name: database__connection__database
+              value: ""
+            - name: mail__transport
+              value: "SMTP"
+            - name: mail__options__host
+              value: ""
+            - name: mail__options__port
+              value: "465"
+            - name: mail__options__secure
+              value: "true"
+            - name: mail__options__auth__user
+              value: ""
+            - name: mail__options__auth__pass
+              value: ""
+            - name: url
+              value: "https://substack.prayujt.com"
+          ports:
+            - containerPort: 2368
+          volumeMounts:
+            - name: ghost-content
+              mountPath: /var/lib/ghost/content
+      volumes:
+        - name: ghost-content
+          persistentVolumeClaim:
+            claimName: ghost-content-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ghost
+  namespace: ghost
+spec:
+  selector:
+    app: ghost
+  ports:
+    - protocol: TCP
+      port: 2368
+      targetPort: 2368
+  type: ClusterIP

@@ -26,30 +26,30 @@ spec:
         - name: AIRSONIC_PORT
           value: "4040"
         volumeMounts:
-        - name: playlists
-          mountPath: /var/playlists
+          #- name: playlists
+          #mountPath: /var/playlists
         - name: podcasts
           mountPath: /var/podcasts
         - name: data
           mountPath: /var/airsonic
-        - name: music
-          mountPath: /var/music
+            #- name: music
+            #mountPath: /var/music
         securityContext:
           runAsUser: 0
           runAsGroup: 0
       volumes:
-      - name: playlists
-        persistentVolumeClaim:
-          claimName: airsonic-playlists-pvc
+        #- name: playlists
+        #persistentVolumeClaim:
+        #  claimName: airsonic-playlists-pvc
       - name: podcasts
         persistentVolumeClaim:
           claimName: airsonic-podcasts-pvc
       - name: data
         persistentVolumeClaim:
           claimName: airsonic-data-pvc
-      - name: music
-        persistentVolumeClaim:
-          claimName: airsonic-music-pvc
+            #- name: music
+            #persistentVolumeClaim:
+            #claimName: airsonic-music-pvc
 ---
 apiVersion: v1
 kind: Service

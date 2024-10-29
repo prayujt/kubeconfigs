@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minecraft-server
+  namespace: minecraft
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minecraft
+  template:
+    metadata:
+      labels:
+        app: minecraft
+    spec:
+      containers:
+      - name: minecraft
+        image: itzg/minecraft-server
+        ports:
+        - containerPort: 25565
+        tty: true
+        stdin: true
+        env:
+        - name: EULA
+          value: "TRUE"
+        volumeMounts:
+        - name: minecraft-data
+          mountPath: /data
+      volumes:
+      - name: minecraft-data
+        persistentVolumeClaim:
+          claimName: minecraft-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft-service
+  namespace: minecraft
+spec:
+  selector:
+    app: minecraft
+  ports:
+    - protocol: TCP
+      port: 25565
+      targetPort: 25565
+  type: LoadBalancer

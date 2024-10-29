@@ -8,3 +8,5 @@ cloud/psql-public.yaml
 cloud/psql-public-volume.yaml
 calendar/backend.yaml
 hydra/proxy.yaml
+ghost/ghost.yaml
+ghost/ghost-db.yaml

@@ -8,3 +8,5 @@ data:
   6379: "edugator/redis:6379"
   5432: "cloud/postgres-public:5432"
   5433: "hydrogator/postgres:5432"
+  1883: "mqtt/mosquitto:1883"
+  25565: "minecraft/minecraft-service:25565"

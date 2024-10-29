@@ -65,6 +65,9 @@ server:
     repository: ghcr.io/immich-app/immich-server
     pullPolicy: IfNotPresent
   
+  livenessProbe:
+    enabled: false
+
   ingress:
     main:
       enabled: false
