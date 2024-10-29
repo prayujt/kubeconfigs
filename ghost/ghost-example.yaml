@@ -41,6 +41,8 @@ spec:
               value: ""
             - name: mail__options__auth__pass
               value: ""
+            - name: mail__from
+              value: "noreply@prayujt.com"
             - name: url
               value: "https://substack.prayujt.com"
           ports:
