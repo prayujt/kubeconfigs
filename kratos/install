@@ -1,0 +1,1 @@
+helm install -f values.yaml kratos ory/kratos -n kratos
