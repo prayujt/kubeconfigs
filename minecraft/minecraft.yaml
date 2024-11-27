@@ -13,6 +13,17 @@ spec:
       labels:
         app: minecraft
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: server-master
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - master
       containers:
       - name: minecraft
         image: itzg/minecraft-server

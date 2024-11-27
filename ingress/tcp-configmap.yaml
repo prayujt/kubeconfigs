@@ -4,9 +4,10 @@ metadata:
   name: tcp-services
   namespace: ingress-nginx
 data:
+  5000: "docker-registry/registry-service:5000"
+  25565: "minecraft/minecraft-service:25565"
   #22: "gitea/gitea-ssh:2222"
   #6379: "edugator/redis:6379"
   #5432: "cloud/postgres-public:5432"
   #5433: "hydrogator/postgres:5432"
   #1883: "mqtt/mosquitto:1883"
-  #25565: "minecraft/minecraft-service:25565"

@@ -1,0 +1,1 @@
+helm install hydra ory/hydra -n hydra -f values.yaml

@@ -5,11 +5,11 @@ metadata:
   namespace: docker-registry
 spec:
   capacity:
-    storage: 25Gi
+    storage: 100Gi
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.docker-registry
+    path: /srv/docker
     server: 192.168.86.100
   storageClassName: docker-registry
 ---
@@ -23,7 +23,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 25Gi
+      storage: 100Gi
   volumeName: registry-pv
   storageClassName: docker-registry
 
