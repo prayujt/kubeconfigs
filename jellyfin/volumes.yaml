@@ -35,11 +35,11 @@ metadata:
   namespace: jellyfin
 spec:
   capacity:
-    storage: 500Gi
+    storage: 450Gi
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/Media
+    path: /srv/media
     server: 192.168.86.100
   storageClassName: jellyfin-media
 ---
@@ -81,6 +81,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 500Gi
+      storage: 450Gi
   volumeName: jellyfin-media
   storageClassName: jellyfin-media
