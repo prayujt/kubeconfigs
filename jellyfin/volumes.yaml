@@ -9,7 +9,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.jellyfin/config
+    path: /srv/jellyfin/config
     server: 192.168.86.100
   storageClassName: jellyfin-config
 ---
@@ -24,7 +24,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.jellyfin/cache
+    path: /srv/jellyfin/cache
     server: 192.168.86.100
   storageClassName: jellyfin-cache
 ---

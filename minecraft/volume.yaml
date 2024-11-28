@@ -9,7 +9,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.minecraft
+    path: /srv/minecraft
     server: 192.168.86.100
   storageClassName: minecraft-data
 ---
