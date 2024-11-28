@@ -15,11 +15,9 @@ env:
 controller:
   enabled: true
   type: deployment
-  replicas: 2
+  replicas: 1
 
 image:
-  #tag: v1.98.1
-  #tag: v1.105.1
   tag: release
 
 immich:
@@ -44,6 +42,13 @@ postgresql:
         database: immich
         password: immich
   primary:
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "1"
     initdb:
       scripts:
         create-extensions.sql: |
