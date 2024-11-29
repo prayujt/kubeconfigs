@@ -5,11 +5,11 @@ metadata:
   namespace: affine
 spec:
   capacity:
-    storage: 30Gi
+    storage: 1Gi
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.affine-data/config
+    path: /srv/data/affine/config
     server: 192.168.86.100
   storageClassName: affine-data
 ---
@@ -20,11 +20,11 @@ metadata:
   namespace: affine
 spec:
   capacity:
-    storage: 30Gi
+    storage: 2Gi
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.affine-data/storage
+    path: /srv/data/affine/storage
     server: 192.168.86.100
   storageClassName: affine-data
 ---
@@ -35,11 +35,11 @@ metadata:
   namespace: affine
 spec:
   capacity:
-    storage: 10Gi
+    storage: 1Gi
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.affine-data/redis
+    path: /srv/data/affine/redis
     server: 192.168.86.100
   storageClassName: affine-data
 ---
@@ -54,7 +54,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.affine-data/postgres
+    path: /srv/data/affine/postgres
     server: 192.168.86.100
   storageClassName: affine-data
 ---
@@ -68,7 +68,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 30Gi
+      storage: 1Gi
   volumeName: affine-nfs-pv-config
   storageClassName: affine-data
 ---
@@ -82,7 +82,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 30Gi
+      storage: 2Gi
   volumeName: affine-nfs-pv-storage
   storageClassName: affine-data
 ---
@@ -96,7 +96,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 1Gi
   volumeName: affine-nfs-pv-redis
   storageClassName: affine-data
 ---
