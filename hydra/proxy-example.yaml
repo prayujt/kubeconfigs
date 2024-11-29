@@ -23,7 +23,7 @@ spec:
         - --client-secret=
         - --cookie-secret=
         - --email-domain=*
-        - --cookie-expire=24h0m0s
+        - --cookie-expire=720h0m0s
         - --pass-authorization-header=true
         - --pass-access-token=true
         - --cookie-domain=.prayujt.com

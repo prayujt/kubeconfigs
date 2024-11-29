@@ -5,10 +5,11 @@ kratos:
         base_url: https://idp.prayujt.com
     cookies:
       domain: prayujt.com
-      same_site: None
+      same_site: Lax
     session:
       cookie:
         domain: prayujt.com
+      lifespan: 720h0m0s
     dsn: postgres://kratos_user:kratos_password@postgres:5432/kratos_db
     identity:
       default_schema_id: default
