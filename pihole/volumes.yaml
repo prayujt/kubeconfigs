@@ -5,11 +5,11 @@ metadata:
   namespace: pihole
 spec:
   capacity:
-    storage: 10Gi
+    storage: 2Gi
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.pihole/config
+    path: /srv/data/pihole/config
     server: 192.168.86.100
   storageClassName: pihole-config
 ---
@@ -20,11 +20,11 @@ metadata:
   namespace: pihole
 spec:
   capacity:
-    storage: 10Gi
+    storage: 1Gi
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.pihole/dnsmasq
+    path: /srv/data/pihole/dnsmasq
     server: 192.168.86.100
   storageClassName: pihole-dnsmasq
 ---
@@ -38,7 +38,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 2Gi
   volumeName: pihole-config-pv
   storageClassName: pihole-config
 ---
@@ -52,6 +52,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: 1Gi
   volumeName: pihole-dnsmasq-pv
   storageClassName: pihole-dnsmasq

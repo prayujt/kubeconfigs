@@ -14,12 +14,17 @@ spec:
         app: pihole
     spec:
       hostNetwork: true
-      tolerations:
-      - key: "master"
-        operator: "Exists"
-        effect: "PreferNoSchedule"
       nodeSelector:
         kubernetes.io/hostname: server-master
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - master
       containers:
       - name: pihole
         image: pihole/pihole:latest
