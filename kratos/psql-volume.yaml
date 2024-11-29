@@ -9,7 +9,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.kratos
+    path: /srv/data/kratos
     server: 192.168.86.100
   storageClassName: kratos-psql
 ---

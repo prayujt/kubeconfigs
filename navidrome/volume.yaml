@@ -5,26 +5,12 @@ metadata:
   namespace: navidrome
 spec:
   capacity:
-    storage: 150Gi
+    storage: 250Gi
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/Music
+    path: /srv/music
     server: 192.168.86.100
-  storageClassName: navidrome-music
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: music-nfs-pvc
-  namespace: navidrome
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 150Gi
-  volumeName: music-nfs-pv
   storageClassName: navidrome-music
 ---
 apiVersion: v1
@@ -38,8 +24,22 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.navidrome
+    path: /srv/data/navidrome
     server: 192.168.86.100
+  storageClassName: navidrome-music
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: music-nfs-pvc
+  namespace: navidrome
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 250Gi
+  volumeName: music-nfs-pv
   storageClassName: navidrome-music
 ---
 apiVersion: v1

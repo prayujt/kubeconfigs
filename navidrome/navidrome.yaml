@@ -26,7 +26,7 @@ spec:
         - name: ND_SESSIONTIMEOUT
           value: "24h"
         - name: ND_BASEURL
-          value: ""
+          value: "https://music.prayujt.com"
         - name: ND_CONFIGFILE
           value: "/data/navidrome.toml"
         - name: ND_LASTFM_APIKEY
