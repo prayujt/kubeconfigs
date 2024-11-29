@@ -5,11 +5,11 @@ metadata:
   namespace: vpn
 spec:
   capacity:
-    storage: 5Gi
+    storage: 1Gi
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.headscale
+    path: /srv/data/headscale
     server: 192.168.86.100
   storageClassName: headscale-config
 ---
@@ -23,6 +23,6 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 5Gi
+      storage: 1Gi
   volumeName: headscale-config
   storageClassName: headscale-config
