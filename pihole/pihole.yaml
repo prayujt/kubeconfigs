@@ -48,6 +48,10 @@ spec:
           value: "dns.prayujt.com,prayujt.com"
         - name: WEB_PORT
           value: "8001"
+        - name: PIHOLE_DNS_
+          value: "1.1.1.1,1.0.0.1"
+        - name: INTERFACE
+          value: "enp3s0"
         - name: WEBPASSWORD
           valueFrom:
             secretKeyRef:
