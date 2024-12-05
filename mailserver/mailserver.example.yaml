@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mailserver
+  namespace: mail
 spec:
   replicas: 1
   selector:
@@ -49,6 +50,16 @@ spec:
           value: "none"
         - name: TLS_LEVEL
           value: "intermediate"
+        - name: NETWORK_INTERFACE
+          value: "enp3s0"
+        - name: RELAY_HOST
+          value: ""
+        - name: RELAY_PORT
+          value: ""
+        - name: RELAY_USER
+          value: ""
+        - name: RELAY_PASSWORD
+          value: ""
         volumeMounts:
         - name: mail-data
           mountPath: "/var/mail/"
@@ -74,17 +85,17 @@ spec:
           failureThreshold: 1
       volumes:
       - name: mail-data
-        hostPath:
-          path: /root/kubeconfigs/mailserver/docker-data/dms/mail-data/
+        persistentVolumeClaim:
+          claimName: mail-data-pvc
       - name: mail-state
-        hostPath:
-          path: /root/kubeconfigs/mailserver/docker-data/dms/mail-state/
+        persistentVolumeClaim:
+          claimName: mail-state-pvc
       - name: mail-logs
-        hostPath:
-          path: /root/kubeconfigs/mailserver/docker-data/dms/mail-logs/
+        persistentVolumeClaim:
+          claimName: mail-logs-pvc
       - name: config
-        hostPath:
-          path: /root/kubeconfigs/mailserver/docker-data/dms/config/
+        persistentVolumeClaim:
+          claimName: mail-config-pvc
       - name: tls-secret
         secret:
           secretName: mail-prayujt-tls
@@ -96,8 +107,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mailserver-service
+  namespace: mail
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: mailserver
   ports:
@@ -105,24 +117,19 @@ spec:
       protocol: TCP
       port: 25
       targetPort: 25
-      nodePort: 10000
     - name: imap
       protocol: TCP
       port: 143
       targetPort: 143
-      nodePort: 10001
     - name: esmtp-implicit-tls
       protocol: TCP
       port: 465
       targetPort: 465
-      nodePort: 10002
     - name: esmtp-explicit-tls
       protocol: TCP
       port: 587
       targetPort: 587
-      nodePort: 10003
     - name: imap4-implicit-tls
       protocol: TCP
       port: 993
       targetPort: 993
-      nodePort: 10004

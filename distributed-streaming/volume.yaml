@@ -10,7 +10,7 @@ spec:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
   nfs:
-    path: /home/files/Music
+    path: /srv/music
     server: 192.168.86.100
   storageClassName: distributed-streaming-music
 ---

@@ -3,6 +3,7 @@ kind: Certificate
 
 metadata:
   name: mail-prayujt-tls
+  namespace: mail
 
 spec:
   isCA: false

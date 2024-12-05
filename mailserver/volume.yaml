@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mail-data-pv
+  namespace: mail
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /srv/mail/data
+    server: 192.168.86.100
+  storageClassName: mail-data
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mail-state-pv
+  namespace: mail
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /srv/mail/state
+    server: 192.168.86.100
+  storageClassName: mail-state
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mail-logs-pv
+  namespace: mail
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /srv/mail/logs
+    server: 192.168.86.100
+  storageClassName: mail-logs
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mail-config-pv
+  namespace: mail
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /srv/mail/config
+    server: 192.168.86.100
+  storageClassName: mail-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mail-data-pvc
+  namespace: mail
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: mail-data-pv
+  storageClassName: mail-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mail-state-pvc
+  namespace: mail
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: mail-state-pv
+  storageClassName: mail-state
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mail-logs-pvc
+  namespace: mail
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: mail-logs-pv
+  storageClassName: mail-logs
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mail-config-pvc
+  namespace: mail
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: mail-config-pv
+  storageClassName: mail-config

@@ -44,6 +44,8 @@ spec:
         app: distributed-streaming
     spec:
       serviceAccountName: distributed-streaming-service-account
+      nodeSelector:
+        kubernetes.io/arch: arm64
       containers:
       - name: distributed-streaming
         image: docker.prayujt.com/distributed-streaming-api
