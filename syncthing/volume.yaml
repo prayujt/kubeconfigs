@@ -9,7 +9,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/Sync
+    path: /srv/sync
     server: 192.168.86.100
   storageClassName: syncthing
 ---

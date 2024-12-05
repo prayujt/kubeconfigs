@@ -13,6 +13,18 @@ spec:
       labels:
         app: syncthing
     spec:
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/hostname: server-master
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - master
       containers:
         - name: syncthing
           image: syncthing/syncthing
@@ -43,6 +55,7 @@ metadata:
   name: syncthing
   namespace: syncthing
 spec:
+  type: ClusterIP
   selector:
     app: syncthing
   ports:
@@ -54,16 +67,11 @@ spec:
       port: 22000
       targetPort: 22000
       protocol: TCP
-      nodePort: 22000
     - name: quic-file-transfers
       port: 22001
       targetPort: 22001
       protocol: UDP
-      nodePort: 22001
     - name: local-discovery-broadcasts
       port: 21027
       targetPort: 21027
       protocol: UDP
-      nodePort: 21027
-  type: NodePort
-

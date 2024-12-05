@@ -9,10 +9,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - syncthing.prayujt.com
+    - sync.prayujt.com
     secretName: syncthing-prayujt-com-certs
   rules:
-  - host: syncthing.prayujt.com
+  - host: sync.prayujt.com
     http:
       paths:
       - pathType: Prefix
