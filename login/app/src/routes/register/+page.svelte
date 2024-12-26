@@ -16,7 +16,8 @@
     const handleRegister = async () => {
         isLoading = true;
         errorMessages = [];
-        errorMessages = ['Nice try, signing up isn\'t allowed. Please ask Prayuj for permission.']
+	//errorMessages = ['Nice try, signing up isn\'t allowed. Please ask Prayuj for permission.'];
+	//return;
 
         try {
             const initResponse = await fetch(
