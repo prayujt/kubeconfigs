@@ -29,3 +29,10 @@ jobs:
       - name: Build and push Docker image
         run: |
           docker buildx build --platform linux/arm64 -t docker.prayujt.com/sso-login --push ./login/app/
+	  
+      - name: Request Redeployment
+        run: |
+          sleep 5; curl -X POST https://deploy.prayujt.com \
+          -H "Authorization: Bearer ${{ secrets.DEPLOY_TOKEN }}" \
+          -H "Content-Type: application/json" \
+	  -d '{"namespace":"sso", "deploymentName":"sso-login"}'
