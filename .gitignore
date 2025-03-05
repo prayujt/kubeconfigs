@@ -11,3 +11,4 @@ hydra/proxy.yaml
 ghost/ghost.yaml
 ghost/ghost-db.yaml
 mailserver/mailserver.yaml
+nimbus/db-secret.yaml

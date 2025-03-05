@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nimbus-ingress
+  namespace: nimbus
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels:
+    app: nimbus
+spec:
+  rules:
+    - host: nimbus.prayujt.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nimbus
+                port:
+                  name: http
+  tls:
+    - hosts:
+        - nimbus.prayujt.com
+      secretName: nimbus-tls
