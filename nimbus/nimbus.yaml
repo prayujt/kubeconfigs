@@ -22,10 +22,34 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: NODE_ENV
+            - name: ENVIRONMENT
               value: "production"
+            - name: DOMAIN
+              value: "prayujt.com"
+            - name: DB_USER
+              value: "nimbus"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: DB_HOST
+              value: "nimbus-db"
+            - name: DB_NAME
+              value: "nimbus"
+            - name: DB_PORT
+              value: "5432"
+            - name: NIMBUS_PVC
+              value: "nimbus-data-pvc"
           args:
             - "server"
+          volumeMounts:
+            - mountPath: "/volumes"
+              name: nimbus-volumes
+      volumes:
+        - name: nimbus-volumes
+          persistentVolumeClaim:
+            claimName: nimbus-data-pvc
 ---
 apiVersion: v1
 kind: Service
