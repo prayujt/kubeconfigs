@@ -39,17 +39,12 @@ spec:
               value: "nimbus"
             - name: DB_PORT
               value: "5432"
-            - name: NIMBUS_PVC
-              value: "nimbus-data-pvc"
+            - name: NIMBUS_STORAGE_CLASS
+              value: "nfs-client"
+            - name: NIMBUS_PV
+              value: "nfs-client"
           args:
             - "server"
-          volumeMounts:
-            - mountPath: "/volumes"
-              name: nimbus-volumes
-      volumes:
-        - name: nimbus-volumes
-          persistentVolumeClaim:
-            claimName: nimbus-data-pvc
 ---
 apiVersion: v1
 kind: Service
