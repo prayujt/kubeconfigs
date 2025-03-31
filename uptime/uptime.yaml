@@ -23,10 +23,15 @@ spec:
           volumeMounts:
             - name: uptime-kuma-data
               mountPath: /app/data
+            - name: uptime-kuma-cert
+              mountPath: /certs
       volumes:
         - name: uptime-kuma-data
           persistentVolumeClaim:
-            claimName: uptime-kuma-pvc
+            claimName: uptime-kuma-data-pvc
+        - name: uptime-kuma-cert
+          persistentVolumeClaim:
+            claimName: uptime-kuma-cert-pvc
 ---
 apiVersion: v1
 kind: Service
