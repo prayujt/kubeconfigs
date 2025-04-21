@@ -31,7 +31,7 @@
     <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
         <img class="w-24 h-24 mb-5 rounded-lg" src={headshot} alt="Prayuj" />
         <a href="" class="flex items-center mb-6 text-3xl font-heavy text-gray-900">
-            Prayuj Authentication
+            Prayuj Cloud
         </a>
         <div class="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
             <div class="p-6 space-y-4 md:space-y-6 sm:p-8">

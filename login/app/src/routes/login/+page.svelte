@@ -44,8 +44,8 @@
                 });
 
                 if (!serverResponse.ok) {
-                    throw new Error("Network response was not ok");
                     errorMessage = "Found existing session, but could not automatically log you in";
+                    throw new Error("Network response was not ok");
                 }
 
                 const { redirect_to } = await serverResponse.json();
@@ -155,7 +155,7 @@
     <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
         <img class="w-24 h-24 mb-5 rounded-lg" src={headshot} alt="Prayuj" />
         <a href="" class="flex items-center mb-6 text-3xl font-heavy text-gray-900">
-            Sign in with Prayuj Authentication
+            Sign in to Prayuj Cloud
         </a>
         <div class="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0">
             {#if errorMessage}
