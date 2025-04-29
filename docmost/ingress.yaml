@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: docmost-ingress
+  namespace: docmost
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/auth-url: "https://idp.prayujt.com/sessions/whoami"
+    nginx.ingress.kubernetes.io/auth-signin: "https://proxy.prayujt.com/oauth2/start?rd=$scheme://$host$request_uri"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - docs.prayujt.com
+    secretName: docs-prayujt-certs
+  rules:
+  - host: docs.prayujt.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: docmost
+            port:
+              number: 3000

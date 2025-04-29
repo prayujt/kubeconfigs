@@ -11,6 +11,10 @@ spec:
   nfs:
     path: /srv/data/pihole/config
     server: 192.168.86.100
+  mountOptions:
+    - vers=4.1
+    - hard
+    - noatime
   storageClassName: pihole-config
 ---
 apiVersion: v1

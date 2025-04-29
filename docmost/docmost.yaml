@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docmost
+  namespace: docmost
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docmost
+  template:
+    metadata:
+      labels:
+        app: docmost
+    spec:
+      containers:
+        - name: docmost
+          image: docmost/docmost:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: APP_URL
+              value: "https://docs.prayujt.com"
+            - name: APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docmost-secrets
+                  key: APP_SECRET
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: docmost-secrets
+                  key: POSTGRES_URL
+            - name: REDIS_URL
+              value: "redis://redis:6379"
+            - name: MAIL_DRIVER
+              value: "smtp"
+            - name: SMTP_HOST
+              value: "mail.prayujt.com"
+            - name: SMTP_PORT
+              value: "465"
+            - name: SMTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: docmost-secrets
+                  key: SMTP_USERNAME
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: docmost-secrets
+                  key: SMTP_PASSWORD
+            - name: SMTP_SECURE
+              value: "true"
+            - name: MAIL_FROM_ADDRESS
+              value: "noreply@prayujt.com"
+            - name: MAIL_FROM_NAME
+              value: "Docmost"
+          volumeMounts:
+            - name: docmost-data
+              mountPath: /app/data/storage
+      volumes:
+        - name: docmost-data
+          persistentVolumeClaim:
+            claimName: docmost-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docmost
+  namespace: docmost
+spec:
+  type: ClusterIP
+  selector:
+    app: docmost
+  ports:
+    - port: 3000
+      targetPort: 3000
