@@ -41,8 +41,6 @@ spec:
               value: "5432"
             - name: NIMBUS_STORAGE_CLASS
               value: "nfs-client"
-            - name: NIMBUS_PV
-              value: "nfs-client"
           args:
             - "server"
 ---
