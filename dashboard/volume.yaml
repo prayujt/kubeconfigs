@@ -9,7 +9,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.dashboard
+    path: /srv/data/dashboard
     server: 192.168.86.100
   storageClassName: dashboard-config
 ---
@@ -26,4 +26,3 @@ spec:
       storage: 1Gi
   volumeName: dashboard-config-pv
   storageClassName: dashboard-config
-
