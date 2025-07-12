@@ -79,17 +79,19 @@ metadata:
   name: pihole-dns
   namespace: pihole
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: pihole
   ports:
     - name: dns-tcp
       port: 53
       targetPort: 53
+      nodePort: 32000
       protocol: TCP
     - name: dns-udp
       port: 53
       targetPort: 53
+      nodePort: 32000
       protocol: UDP
     - name: dhcp
       port: 67

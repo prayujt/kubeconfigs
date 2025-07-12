@@ -6,9 +6,7 @@ metadata:
 data:
   22: "gitea/gitea-ssh:2222"
   5000: "docker-registry/registry-service:5000"
-  5432: "cityio/cityio-psql:5432"
-  6379: "edugator/redis:6379"
-  20000: "pihole/pihole-dns:53"
+  #20000: "pihole/pihole-dns:53"
   25565: "minecraft/minecraft-service:25565"
   #5432: "cloud/postgres-public:5432"
   #1883: "mqtt/mosquitto:1883"
