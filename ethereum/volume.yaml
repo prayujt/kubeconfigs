@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ethereum-pv-geth
+  namespace: eth
+spec:
+  capacity:
+    storage: 150Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    path: /srv/ethereum/geth
+    server: 192.168.86.100
+  storageClassName: ethereum-data
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ethereum-pv-lighthouse
+  namespace: eth
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    path: /srv/ethereum/lighthouse
+    server: 192.168.86.100
+  storageClassName: ethereum-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ethereum-pvc-geth
+  namespace: eth
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 150Gi
+  volumeName: ethereum-pv-geth
+  storageClassName: ethereum-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ethereum-pvc-lighthouse
+  namespace: eth
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  volumeName: ethereum-pv-lighthouse
+  storageClassName: ethereum-data

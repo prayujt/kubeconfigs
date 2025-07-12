@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ethereum-geth
+  namespace: eth
+  labels:
+    app: ethereum-geth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ethereum-geth
+  template:
+    metadata:
+      labels:
+        app: ethereum-geth
+    spec:
+      containers:
+        - name: geth
+          image: ethereum/client-go:stable
+          args:
+            - --sepolia
+            - --syncmode=snap
+            - --datadir=/root/.ethereum
+            - --http
+            - --http.addr=0.0.0.0
+            - --http.port=8545
+            - --http.api=eth,net,web3
+            - --http.corsdomain=*
+            - --http.vhosts=*
+            - --authrpc.addr=0.0.0.0
+            - --authrpc.port=8551
+            - --authrpc.vhosts=*
+            - --authrpc.jwtsecret=/jwt/jwtsecret
+          ports:
+            - containerPort: 8545
+              name: http
+            - containerPort: 8551
+              name: engine
+          volumeMounts:
+            - name: geth-data
+              mountPath: /root/.ethereum
+            - name: jwt-secret
+              mountPath: /jwt
+              readOnly: true
+      volumes:
+        - name: geth-data
+          persistentVolumeClaim:
+            claimName: ethereum-pvc-geth
+        - name: jwt-secret
+          secret:
+            secretName: ethereum-jwtsecret
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ethereum-lighthouse
+  namespace: eth
+  labels:
+    app: ethereum-lighthouse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ethereum-lighthouse
+  template:
+    metadata:
+      labels:
+        app: ethereum-lighthouse
+    spec:
+      containers:
+        - name: lighthouse
+          image: sigp/lighthouse:latest
+          command: ["lighthouse"]
+          args:
+            - beacon
+            - --network=sepolia
+            - --execution-endpoint=http://ethereum-geth:8551
+            - --execution-jwt=/jwt/jwtsecret
+            - --execution-jwt-id=1
+            - --checkpoint-sync-url=https://beaconstate-sepolia.chainsafe.io
+            - --disable-deposit-contract-sync
+            - --datadir=/root/.lighthouse
+            - --http
+            - --http-address=0.0.0.0
+            - --metrics
+          ports:
+            - containerPort: 5052
+              name: rest
+          volumeMounts:
+            - name: lighthouse-data
+              mountPath: /root/.lighthouse
+            - name: jwt-secret
+              mountPath: /jwt
+              readOnly: true
+      volumes:
+        - name: lighthouse-data
+          persistentVolumeClaim:
+            claimName: ethereum-pvc-lighthouse
+        - name: jwt-secret
+          secret:
+            secretName: ethereum-jwtsecret
+
