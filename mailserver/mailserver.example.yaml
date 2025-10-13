@@ -60,6 +60,10 @@ spec:
           value: ""
         - name: RELAY_PASSWORD
           value: ""
+        - name: ENABLE_POLICYD_SPF
+          value: "0"
+        - name: ENABLE_RSPAMD
+          value: "1"
         volumeMounts:
         - name: mail-data
           mountPath: "/var/mail/"
