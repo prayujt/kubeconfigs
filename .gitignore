@@ -12,3 +12,5 @@ ghost/ghost.yaml
 ghost/ghost-db.yaml
 mailserver/mailserver.yaml
 nimbus/db-secret.yaml
+immich/values.yaml
+immich/psql.yaml

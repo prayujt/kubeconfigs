@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-psql-pv
+  namespace: immich
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /srv/data/immich
+    server: 192.168.86.100
+  storageClassName: immich-psql
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-psql-pvc
+  namespace: immich
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: immich-psql-pv
+  storageClassName: immich-psql

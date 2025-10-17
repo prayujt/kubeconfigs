@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immich-psql-init
+  namespace: immich
+data:
+  01_extensions.sql: |
+    -- Runs only on first bootstrap of the data directory.
+    -- Create VectorChord + earthdistance (will pull in cube via CASCADE).
+    CREATE EXTENSION IF NOT EXISTS vchord CASCADE;
+    CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: immich-psql
+  namespace: immich
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: immich-psql
+  template:
+    metadata:
+      labels:
+        app: immich-psql
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 26
+        runAsGroup: 26
+        fsGroup: 26
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: postgres
+          image: ghcr.io/tensorchord/cloudnative-vectorchord:16.9-0.4.3
+          args:
+            - "-c"
+            - "shared_preload_libraries=vchord.so"
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "<user>"
+            - name: POSTGRES_PASSWORD
+              value: "<password>"
+            - name: POSTGRES_DB
+              value: "<database>"
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+            - name: init-sql
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: immich-psql-pvc
+        - name: init-sql
+          configMap:
+            name: immich-psql-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: immich-psql
+  namespace: immich
+spec:
+  selector:
+    app: immich-psql
+  ports:
+    - port: 5432
+      targetPort: 5432
+
