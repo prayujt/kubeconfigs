@@ -5,8 +5,5 @@ metadata:
   namespace: ingress-nginx
 data:
   22: "gitea/gitea-ssh:2222"
-  5000: "docker-registry/registry-service:5000"
-  #20000: "pihole/pihole-dns:53"
+  #5000: "docker-registry/registry-service:5000"
   25565: "minecraft/minecraft-service:25565"
-  #5432: "cloud/postgres-public:5432"
-  #1883: "mqtt/mosquitto:1883"

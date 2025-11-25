@@ -9,9 +9,24 @@ spec:
   accessModes:
     - ReadWriteOnce
   nfs:
-    path: /home/files/.synapse/server
+    path: /srv/data/synapse/server
     server: 192.168.86.100
   storageClassName: synapse-server-data
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: synapse-psql-pv
+  namespace: matrix
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /srv/data/synapse/postgres
+    server: 192.168.86.100
+  storageClassName: synapse-psql-data
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -26,21 +41,6 @@ spec:
       storage: 10Gi
   volumeName: synapse-server-pv
   storageClassName: synapse-server-data
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: synapse-psql-pv
-  namespace: matrix
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  nfs:
-    path: /home/files/.synapse/postgres
-    server: 192.168.86.100
-  storageClassName: synapse-psql-data
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -6,14 +6,15 @@ metadata:
   labels:
     app: ethereum-geth
 spec:
-  type: NodePort
+  #type: NodePort
+  type: ClusterIP
   selector:
     app: ethereum-geth
   ports:
     - name: http
       port: 8545
       targetPort: 8545
-      nodePort: 30000
+      #nodePort: 30000
       protocol: TCP
     - name: engine
       port: 8551

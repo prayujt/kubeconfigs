@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synapse-db
+  namespace: matrix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: synapse-db
+  template:
+    metadata:
+      labels:
+        app: synapse-db
+    spec:
+      containers:
+      - name: synapse-db
+        image: docker.io/postgres:13
+        env:
+        - name: POSTGRES_USER
+          value: synapse_user
+        - name: POSTGRES_PASSWORD
+          value: synapse_pass
+        - name: POSTGRES_DB
+          value: synapse
+        - name: POSTGRES_INITDB_ARGS
+          value: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: synapse-psql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: synapse-db
+  namespace: matrix
+spec:
+  selector:
+    app: synapse-db
+  ports:
+  - port: 5432
+    targetPort: 5432

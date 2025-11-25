@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kube-streaming-music
+  namespace: kube-streaming
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /srv/music
+    server: 192.168.86.100
+  storageClassName: kube-streaming-music
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kube-streaming-music
+  namespace: kube-streaming
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  volumeName: kube-streaming-music
+  storageClassName: kube-streaming-music

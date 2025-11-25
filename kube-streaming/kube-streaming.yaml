@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: distributed-streaming-service-account
-  namespace: distributed-streaming
+  name: kube-streaming-service-account
+  namespace: kube-streaming
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: distributed-streaming
+  namespace: kube-streaming
   name: job-manager
 rules:
 - apiGroups: ["batch"]
@@ -18,11 +18,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: job-manager-binding
-  namespace: distributed-streaming
+  namespace: kube-streaming
 subjects:
 - kind: ServiceAccount
-  name: distributed-streaming-service-account
-  namespace: distributed-streaming
+  name: kube-streaming-service-account
+  namespace: kube-streaming
 roleRef:
   kind: Role
   name: job-manager
@@ -31,39 +31,39 @@ roleRef:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: distributed-streaming
-  namespace: distributed-streaming
+  name: kube-streaming
+  namespace: kube-streaming
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: distributed-streaming
+      app: kube-streaming
   template:
     metadata:
       labels:
-        app: distributed-streaming
+        app: kube-streaming
     spec:
-      serviceAccountName: distributed-streaming-service-account
+      serviceAccountName: kube-streaming-service-account
       nodeSelector:
         kubernetes.io/arch: arm64
       containers:
-      - name: distributed-streaming
-        image: docker.prayujt.com/distributed-streaming-api
+      - name: kube-streaming
+        image: docker.prayujt.com/kube-streaming-api
         ports:
         - containerPort: 8080
         envFrom:
         - secretRef:
-            name: distributed-streaming-secrets
+            name: kube-streaming-secrets
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: distributed-streaming
-  namespace: distributed-streaming
+  name: kube-streaming
+  namespace: kube-streaming
 spec:
   type: ClusterIP
   selector:
-    app: distributed-streaming
+    app: kube-streaming
   ports:
   - protocol: TCP
     port: 8080

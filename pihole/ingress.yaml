@@ -6,7 +6,6 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
-      #nginx.ingress.kubernetes.io/rewrite-target: /admin
 spec:
   tls:
   - hosts:
@@ -30,28 +29,3 @@ spec:
             name: pihole-web
             port:
               number: 80
-                #---
-#apiVersion: networking.k8s.io/v1
-#kind: Ingress
-#metadata:
-#  name: pihole-ingress-admin
-#  namespace: pihole
-#  annotations:
-#    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-#    cert-manager.io/cluster-issuer: letsencrypt-prod
-#spec:
-#  tls:
-#  - hosts:
-#    - dns.prayujt.com
-#    secretName: dns-prayujt-certs
-#  rules:
-#  - host: dns.prayujt.com
-#    http:
-#      paths:
-#      - path: /admin
-#        pathType: Prefix
-#        backend:
-#          service:
-#            name: pihole-web
-#            port:
-#              number: 80

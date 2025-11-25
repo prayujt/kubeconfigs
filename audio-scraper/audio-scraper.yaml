@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audio-scraper
+  namespace: audio-scraper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: audio-scraper
+  template:
+    metadata:
+      labels:
+        app: audio-scraper
+    spec:
+      containers:
+      - name: audio-scraper
+        image: docker.prayujt.com/audio-scraper
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - secretRef:
+            name: audio-scraper-secrets
+        volumeMounts:
+        - name: music
+          mountPath: /music
+      volumes:
+      - name: music
+        persistentVolumeClaim:
+          claimName: audio-scraper-music-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audio-scraper
+  namespace: audio-scraper
+spec:
+  type: ClusterIP
+  selector:
+    app: audio-scraper
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080

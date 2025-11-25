@@ -16,30 +16,30 @@ spec:
       http:
         paths:
           - pathType: Prefix
-            path: /_matrix
+            path: /
             backend:
               service:
                 name: synapse-server
                 port:
                   number: 8008
-          - pathType: Prefix
-            path: /_synapse/client
-            backend:
-              service:
-                name: synapse-server
-                port:
-                  number: 8008
-          - pathType: Prefix
-            path: /client/
-            backend:
-              service:
-                name: sliding-sync
-                port:
-                  number: 8009
-          - pathType: Prefix
-            path: /_matrix/client/unstable/org.matrix.msc3575/sync
-            backend:
-              service:
-                name: sliding-sync
-                port:
-                  number: 8009
+          #          - pathType: Prefix
+          #  path: /_matrix
+          #  backend:
+          #    service:
+          #      name: synapse-server
+          #      port:
+          #        number: 8008
+          #- pathType: Prefix
+          #  path: /_synapse/client
+          #  backend:
+          #    service:
+          #      name: synapse-server
+          #      port:
+          #        number: 8008
+          #- pathType: Prefix
+          #  path: /client/
+          #  backend:
+          #    service:
+          #      name: sliding-sync
+          #      port:
+          #        number: 8009

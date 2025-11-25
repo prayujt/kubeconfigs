@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matrix-wellknown
+  namespace: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matrix-wellknown
+  template:
+    metadata:
+      labels:
+        app: matrix-wellknown
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: wellknown
+          mountPath: /usr/share/nginx/html/.well-known/matrix/client
+          subPath: client
+      volumes:
+      - name: wellknown
+        configMap:
+          name: matrix-wellknown-client
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: matrix-wellknown
+  namespace: dashboard
+spec:
+  selector:
+    app: matrix-wellknown
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+

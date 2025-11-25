@@ -15,9 +15,22 @@ spec:
       labels:
         app: ethereum-geth
     spec:
+      hostNetwork: true
+      nodeSelector:
+        kubernetes.io/hostname: server-master
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - master
       containers:
         - name: geth
-          image: ethereum/client-go:stable
+          #image: ethereum/client-go:stable
+          image: ethereum/client-go:v1.16.5
           args:
             - --sepolia
             - --syncmode=snap
@@ -28,15 +41,36 @@ spec:
             - --http.api=eth,net,web3
             - --http.corsdomain=*
             - --http.vhosts=*
+            - --ws
+            - --ws.addr=0.0.0.0
+            - --ws.port=8546
+            - --ws.api=eth,net,web3
+            - --ws.origins=*
             - --authrpc.addr=0.0.0.0
             - --authrpc.port=8551
             - --authrpc.vhosts=*
             - --authrpc.jwtsecret=/jwt/jwtsecret
+            - --port=30303
+            - --discovery.v5
+            - --maxpeers=50
+            - --log.vmodule=discv5=6,discv4=6,p2p=5
+            - --txlookuplimit=100000
+            - --cache=4096
+            - --gcmode=full
+            - --state.scheme=path
           ports:
             - containerPort: 8545
               name: http
+            - containerPort: 8546
+              name: ws
             - containerPort: 8551
               name: engine
+            - containerPort: 30303
+              name: p2p-tcp
+              protocol: TCP
+            - containerPort: 30303
+              name: p2p-udp
+              protocol: UDP
           volumeMounts:
             - name: geth-data
               mountPath: /root/.ethereum
@@ -78,8 +112,7 @@ spec:
             - --execution-endpoint=http://ethereum-geth:8551
             - --execution-jwt=/jwt/jwtsecret
             - --execution-jwt-id=1
-            - --checkpoint-sync-url=https://beaconstate-sepolia.chainsafe.io
-            - --disable-deposit-contract-sync
+            - --checkpoint-sync-url=https://sepolia.beaconstate.info
             - --datadir=/root/.lighthouse
             - --http
             - --http-address=0.0.0.0
