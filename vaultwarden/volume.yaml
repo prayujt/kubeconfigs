@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: vw-data-pv
+  namespace: vaultwarden
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    path: /srv/data/vault
+    server: 192.168.86.100
+  storageClassName: vw-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vw-data-pvc
+  namespace: vaultwarden
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  volumeName: vw-data-pv
+  storageClassName: vw-data
