@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: registry-ui-deployment
+  namespace: docker-registry
+  labels:
+    app: registry-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: registry-ui
+  template:
+    metadata:
+      labels:
+        app: registry-ui
+    spec:
+      containers:
+      - name: registry-ui
+        image: joxit/docker-registry-ui:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: REGISTRY_TITLE
+          value: "Docker Registry"
+        - name: REGISTRY_URL
+          value: "https://docker.prayujt.com"
+        - name: SINGLE_REGISTRY
+          value: "true"
+        - name: DELETE_IMAGES
+          value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry-ui-service
+  namespace: docker-registry
+spec:
+  type: ClusterIP
+  selector:
+    app: registry-ui
+  ports:
+  - port: 80
+    targetPort: 80

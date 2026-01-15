@@ -10,6 +10,7 @@ metadata:
   name: ingress-nginx-controller
   namespace: ingress-nginx
 spec:
+  replicas: 2
   minReadySeconds: 0
   revisionHistoryLimit: 10
   selector:
@@ -30,18 +31,25 @@ spec:
         app.kubernetes.io/part-of: ingress-nginx
         app.kubernetes.io/version: 1.10.1
     spec:
-      hostNetwork: true
-      nodeSelector:
-        kubernetes.io/hostname: server-master
+      #hostNetwork: true
+      #nodeSelector:
+      #  kubernetes.io/hostname: server-master
       affinity:
-        nodeAffinity:
+        podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: role
-                operator: In
-                values:
-                - master
+          - labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: ingress-nginx
+                app.kubernetes.io/component: controller
+            topologyKey: kubernetes.io/hostname
+      #  nodeAffinity:
+      #    requiredDuringSchedulingIgnoredDuringExecution:
+      #      nodeSelectorTerms:
+      #      - matchExpressions:
+      #        - key: role
+      #          operator: In
+      #          values:
+      #          - master
       volumes:
       - name: webhook-cert
         secret:
@@ -141,8 +149,11 @@ metadata:
   name: ingress-nginx-controller
   namespace: ingress-nginx
 spec:
-  type: ClusterIP
+  type: LoadBalancer
+  loadBalancerIP: 192.168.86.200
   selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/name: ingress-nginx
   ports:
   - name: http
@@ -151,3 +162,6 @@ spec:
   - name: https
     port: 443
     targetPort: 443
+  - name: minecraft
+    port: 25565
+    targetPort: 25565

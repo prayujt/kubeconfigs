@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synapse
+  namespace: synapse
+  labels:
+    app: synapse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: synapse
+  template:
+    metadata:
+      labels:
+        app: synapse
+    spec:
+      containers:
+        - name: nimbus
+          image: docker.prayujt.com/synapse
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ENVIRONMENT
+              value: "production"
+            - name: SERVER_PORt
+              value: "8080"
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-key
+                  key: OPENAI_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: synapse
+  namespace: synapse
+  labels:
+    app: synapse
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: synapse
+  type: ClusterIP
