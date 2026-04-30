@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openclaw
+  namespace: openclaw
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openclaw
+  template:
+    metadata:
+      labels:
+        app: openclaw
+    spec:
+      serviceAccountName: openclaw-sa
+      initContainers:
+      - name: install-kubectl
+        image: bitnami/kubectl:latest
+        command: ["/bin/cp"]
+        args: ["/opt/bitnami/kubectl/bin/kubectl", "/shared-bin/kubectl"]
+        volumeMounts:
+        - name: bin-volume
+          mountPath: /shared-bin
+      - name: install-tools
+        image: ghcr.io/openclaw/openclaw:latest
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "Installing gog CLI..."
+            curl -sL "https://github.com/steipete/gogcli/releases/download/v0.12.0/gogcli_0.12.0_linux_amd64.tar.gz" -o /tmp/gog.tar.gz
+            tar -xzf /tmp/gog.tar.gz -C /tmp/
+            cp /tmp/gog /shared-bin/gog
+            chmod +x /shared-bin/gog
+            echo "gog installed: $(/shared-bin/gog --version)"
+            echo "Installing gh CLI..."
+            curl -sL "https://github.com/cli/cli/releases/download/v2.89.0/gh_2.89.0_linux_amd64.tar.gz" -o /tmp/gh.tar.gz
+            tar -xzf /tmp/gh.tar.gz -C /tmp/
+            cp /tmp/gh_2.89.0_linux_amd64/bin/gh /shared-bin/gh
+            chmod +x /shared-bin/gh
+            echo "gh installed: $(/shared-bin/gh --version)"
+        volumeMounts:
+        - name: bin-volume
+          mountPath: /shared-bin
+      - name: install-playwright
+        image: ghcr.io/openclaw/openclaw:latest
+        securityContext:
+          runAsUser: 0
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            set -e
+            echo "Installing Playwright OS dependencies..."
+            apt-get update
+            apt-get install -y --no-install-recommends \
+              libasound2 libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 \
+              libcairo2 libcups2 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0 \
+              libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 libxcomposite1 \
+              libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
+              fonts-noto-color-emoji fonts-unifont libfontconfig1 libfreetype6 \
+              fonts-liberation fonts-freefont-ttf
+            echo "Installing Playwright and Chromium..."
+            cd /home/node
+            npm install playwright
+            PLAYWRIGHT_BROWSERS_PATH=/shared-bin/ms-playwright npx playwright install chromium
+            echo "Copying ALL shared libraries needed by Chromium..."
+            apt-get install -y --no-install-recommends libxi6
+            mkdir -p /shared-bin/libs
+            # Copy ALL .so files from the system lib dirs
+            cp -a /usr/lib/x86_64-linux-gnu/*.so* /shared-bin/libs/ 2>/dev/null || true
+            cp -a /lib/x86_64-linux-gnu/*.so* /shared-bin/libs/ 2>/dev/null || true
+            echo "Playwright install complete. Libs copied: $(ls /shared-bin/libs/ | wc -l)"
+        volumeMounts:
+        - name: bin-volume
+          mountPath: /shared-bin
+        - name: storage-mount
+          mountPath: /home/node/.openclaw
+        - name: playwright-cache
+          mountPath: /home/node/node_modules
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: openclaw
+        image: ghcr.io/openclaw/openclaw:latest
+        command: ["openclaw", "gateway", "--allow-unconfigured"]
+        env:
+          - name: OPENCLAW_ALLOW_INSECURE_PRIVATE_WS
+            value: "1"
+          - name: OPENCLAW_GATEWAY_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: openclaw-secrets
+                key: gateway-password
+          - name: PATH
+            value: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/node/bin"
+          - name: GOG_KEYRING_PASSWORD
+            value: "openclaw"
+          - name: GOG_ACCOUNT
+            value: "prayuj@polymarket.com"
+          - name: PLAYWRIGHT_BROWSERS_PATH
+            value: "/home/node/bin/ms-playwright"
+          - name: LD_LIBRARY_PATH
+            value: "/home/node/bin/libs"
+        ports:
+        - containerPort: 18789
+        - containerPort: 18791
+        volumeMounts:
+        - name: home-mount
+          mountPath: /home/prayuj
+        - name: storage-mount
+          mountPath: /home/node/.openclaw
+        - name: bin-volume
+          mountPath: /home/node/bin
+        - name: playwright-cache
+          mountPath: /home/node/node_modules
+      volumes:
+      - name: home-mount
+        persistentVolumeClaim:
+          claimName: host-home-pvc
+      - name: storage-mount
+        persistentVolumeClaim:
+          claimName: openclaw-pvc
+      - name: bin-volume
+        emptyDir: {}
+      - name: playwright-cache
+        emptyDir: {}
