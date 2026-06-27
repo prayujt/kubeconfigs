@@ -8,10 +8,18 @@ spec:
     storage: 5Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/data/immich
-    server: 192.168.86.100
   storageClassName: immich-psql
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

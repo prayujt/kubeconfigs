@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: registry-prune-script
+  namespace: docker-registry
+data:
+  prune.py: |
+    #!/usr/bin/env python3
+    # Tag-retention pruner for a registry:2 filesystem store.
+    #
+    # Policy: delete a tag only if it is OLDER than MAX_AGE_DAYS *and* there are
+    # at least MIN_KEEP newer tags in the same repo. The MIN_KEEP newest tags are
+    # always kept regardless of age, and anything younger than MAX_AGE_DAYS is
+    # always kept. A repo left with zero tags has its directory removed so it
+    # drops out of the catalog/UI. Run `registry garbage-collect` afterward to
+    # reclaim the now-unreferenced blobs.
+    import os, json, time, calendar, shutil
+
+    ROOT = os.environ.get("REGISTRY_ROOT", "/var/lib/registry/docker/registry/v2")
+    REPOS = os.path.join(ROOT, "repositories")
+    BLOBS = os.path.join(ROOT, "blobs")
+    MAX_AGE_DAYS = int(os.environ.get("MAX_AGE_DAYS", "30"))
+    MIN_KEEP = int(os.environ.get("MIN_KEEP", "3"))
+    DRY_RUN = os.environ.get("DRY_RUN", "true").lower() != "false"
+
+    now = time.time()
+
+    def blob_path(digest):
+        algo, hexd = digest.split(":", 1)
+        return os.path.join(BLOBS, algo, hexd[:2], hexd, "data")
+
+    def read_link(p):
+        with open(p) as f:
+            return f.read().strip()
+
+    def load_blob_json(digest):
+        with open(blob_path(digest)) as f:
+            return json.load(f)
+
+    def parse_ts(s):
+        # RFC3339, e.g. "2025-03-13T00:41:00.123456789Z" -> epoch seconds (UTC)
+        base = s.strip()[:19]  # YYYY-MM-DDTHH:MM:SS
+        return calendar.timegm(time.strptime(base, "%Y-%m-%dT%H:%M:%S"))
+
+    def manifest_created(digest, depth=0):
+        if depth > 3:
+            raise ValueError("manifest nesting too deep")
+        m = load_blob_json(digest)
+        cfg = m.get("config") if isinstance(m, dict) else None
+        if isinstance(cfg, dict) and "digest" in cfg:
+            created = load_blob_json(cfg["digest"]).get("created")
+            if created:
+                return parse_ts(created)
+        mfs = m.get("manifests") if isinstance(m, dict) else None
+        if mfs:
+            return manifest_created(mfs[0]["digest"], depth + 1)
+        raise ValueError("no created timestamp")
+
+    def find_repos():
+        repos = []
+        for dirpath, dirnames, _ in os.walk(REPOS):
+            if os.path.basename(dirpath) == "_manifests":
+                repos.append(os.path.dirname(dirpath))
+                dirnames[:] = []  # don't descend into _manifests internals
+        return repos
+
+    deleted_tags = 0
+    removed_repos = 0
+    for repo in sorted(find_repos()):
+        name = os.path.relpath(repo, REPOS)
+        tags_dir = os.path.join(repo, "_manifests", "tags")
+        info = []
+        if os.path.isdir(tags_dir):
+            for tag in os.listdir(tags_dir):
+                link = os.path.join(tags_dir, tag, "current", "link")
+                if not os.path.isfile(link):
+                    continue
+                try:
+                    ts, src = manifest_created(read_link(link)), "created"
+                except Exception:
+                    ts, src = os.path.getmtime(link), "mtime"
+                info.append((tag, ts, src))
+        if not info:
+            print(f"[repo-empty] {name} -> remove repo dir")
+            if not DRY_RUN:
+                shutil.rmtree(repo, ignore_errors=True)
+            removed_repos += 1
+            continue
+        info.sort(key=lambda x: x[1], reverse=True)  # newest first
+        for idx, (tag, ts, src) in enumerate(info):
+            age = (now - ts) / 86400.0
+            if idx < MIN_KEEP or age <= MAX_AGE_DAYS:
+                print(f"[keep]   {name}:{tag} rank={idx} age={age:.0f}d src={src}")
+            else:
+                print(f"[DELETE] {name}:{tag} rank={idx} age={age:.0f}d src={src}")
+                if not DRY_RUN:
+                    shutil.rmtree(os.path.join(tags_dir, tag), ignore_errors=True)
+                deleted_tags += 1
+        if not DRY_RUN and os.path.isdir(tags_dir) and not os.listdir(tags_dir):
+            shutil.rmtree(repo, ignore_errors=True)
+            removed_repos += 1
+
+    mode = "DRY-RUN: would delete" if DRY_RUN else "deleted"
+    print(f"\nSummary ({'DRY-RUN' if DRY_RUN else 'LIVE'}): "
+          f"{mode} {deleted_tags} tags, {removed_repos} empty repos. "
+          f"Policy: age>{MAX_AGE_DAYS}d AND >={MIN_KEEP} newer.")

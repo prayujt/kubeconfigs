@@ -8,10 +8,18 @@ spec:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/mail/data
-    server: 192.168.86.100
   storageClassName: mail-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -23,10 +31,18 @@ spec:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/mail/state
-    server: 192.168.86.100
   storageClassName: mail-state
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -38,10 +54,18 @@ spec:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/mail/logs
-    server: 192.168.86.100
   storageClassName: mail-logs
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -53,10 +77,18 @@ spec:
     storage: 10Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/mail/config
-    server: 192.168.86.100
   storageClassName: mail-config
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

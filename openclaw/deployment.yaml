@@ -102,6 +102,8 @@ spec:
             value: "/home/node/bin/ms-playwright"
           - name: LD_LIBRARY_PATH
             value: "/home/node/bin/libs"
+          - name: OPENCLAW_PLUGIN_STAGE_DIR
+            value: "/var/openclaw-stage"
         ports:
         - containerPort: 18789
         - containerPort: 18791
@@ -114,6 +116,8 @@ spec:
           mountPath: /home/node/bin
         - name: playwright-cache
           mountPath: /home/node/node_modules
+        - name: plugin-stage
+          mountPath: /var/openclaw-stage
       volumes:
       - name: home-mount
         persistentVolumeClaim:
@@ -124,4 +128,6 @@ spec:
       - name: bin-volume
         emptyDir: {}
       - name: playwright-cache
+        emptyDir: {}
+      - name: plugin-stage
         emptyDir: {}

@@ -14,3 +14,7 @@ mailserver/mailserver.yaml
 nimbus/db-secret.yaml
 immich/values.yaml
 immich/psql.yaml
+
+# never commit env files (may hold secrets)
+*.env
+**/.env

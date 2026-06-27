@@ -8,10 +8,18 @@ spec:
     storage: 200Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/sync
-    server: 192.168.86.100
   storageClassName: syncthing
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

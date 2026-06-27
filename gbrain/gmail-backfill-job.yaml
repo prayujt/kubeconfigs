@@ -1,0 +1,45 @@
+# One-off 6-month Gmail backfill (all mail). Reuses the gmail-bridge-script
+# ConfigMap. Master-pinned (amd64 image). Idempotent (page per message id).
+#   kubectl -n gbrain delete job gmail-backfill --ignore-not-found
+#   kubectl apply -f gmail-backfill-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gmail-backfill
+  namespace: gbrain
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 14400   # up to 4h
+  template:
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        kubernetes.io/hostname: server-master
+      containers:
+        - name: gmail-backfill
+          image: docker.prayujt.com/gbrain:latest
+          command: ["bun", "/scripts/gmail-bridge.ts"]
+          env:
+            - name: GBRAIN_MCP_URL
+              value: "http://gbrain:3131/mcp"
+            - name: BACKFILL_MODE
+              value: "true"
+            - name: FIRST_RUN_LOOKBACK_DAYS
+              value: "180"
+            - name: MAX_MSGS_PER_RUN
+              value: "20000"
+            - name: GOOGLE_CLIENT_ID
+              valueFrom: { secretKeyRef: { name: gbrain-secrets, key: google-client-id } }
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: gbrain-secrets, key: google-client-secret } }
+            - name: GOOGLE_REFRESH_TOKEN
+              valueFrom: { secretKeyRef: { name: gbrain-secrets, key: google-refresh-token } }
+            - name: GBRAIN_TOKEN
+              valueFrom: { secretKeyRef: { name: gbrain-secrets, key: gmail-bridge-mcp-token } }
+          volumeMounts:
+            - name: script
+              mountPath: /scripts
+      volumes:
+        - name: script
+          configMap:
+            name: gmail-bridge-script

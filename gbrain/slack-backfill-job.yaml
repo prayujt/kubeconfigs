@@ -1,0 +1,56 @@
+# One-off full-history Slack backfill. Reuses the slack-bridge-script ConfigMap
+# but overrides env: BACKFILL_MODE (ignore cursor + replace pages), a wide
+# lookback, and a long deadline. Safe to re-run (idempotent replace).
+#   kubectl -n gbrain delete job slack-backfill --ignore-not-found
+#   kubectl apply -f slack-backfill-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: slack-backfill
+  namespace: gbrain
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 21600   # up to 6h (Slack Tier-3 rate limits pace it)
+  template:
+    spec:
+      restartPolicy: Never
+      nodeSelector:               # image is amd64-only; master is the amd64 node
+        kubernetes.io/hostname: server-master
+      containers:
+        - name: slack-backfill
+          image: docker.prayujt.com/gbrain:latest
+          command: ["bun", "/scripts/slack-bridge.ts"]
+          env:
+            - name: GBRAIN_MCP_URL
+              value: "http://gbrain:3131/mcp"
+            - name: BACKFILL_MODE
+              value: "true"
+            - name: FIRST_RUN_LOOKBACK_DAYS
+              value: "180"           # 6 months — keeps thread-fetching tractable
+            - name: MAX_MSGS_PER_CHANNEL_PER_RUN
+              value: "50000"
+            - name: FETCH_THREADS
+              value: "true"    # include historical thread replies (+ reactions
+                               # are inline on every message)
+            - name: THREAD_LOOKBACK_DAYS
+              value: "90"      # threads only for last 90d (replies API is
+                               # rate-limited); bot/alert channels skipped
+            - name: SKIP_THREAD_CHANNELS
+              value: "^alerts-|resolutions-auto|automatic-games|^monitoring|^logs-"
+            - name: SLACK_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gbrain-secrets
+                  key: slack-user-token
+            - name: GBRAIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: gbrain-secrets
+                  key: slack-bridge-mcp-token
+          volumeMounts:
+            - name: script
+              mountPath: /scripts
+      volumes:
+        - name: script
+          configMap:
+            name: slack-bridge-script

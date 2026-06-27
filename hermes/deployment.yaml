@@ -1,0 +1,217 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hermes
+  namespace: hermes
+  labels:
+    app: hermes
+spec:
+  # Single writer: Hermes runs the persistent agent loop + SQLite on the RWO
+  # data volume. Recreate (never RollingUpdate) so two pods can't overlap on
+  # the volume and corrupt the SQLite databases.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hermes
+  template:
+    metadata:
+      labels:
+        app: hermes
+    spec:
+      # SA from rbac.yaml: kubectl access scoped to hermes + gbrain namespaces.
+      serviceAccountName: hermes-agent
+      # Pin to server-master: the data PV is a local hostPath on that node.
+      nodeSelector:
+        kubernetes.io/hostname: server-master
+      # Run as root so the container can write the hostPath data dir
+      # (/srv/hermes/data is root-owned), same approach as gbrain's /root mount.
+      # fsGroup 10000 matches the `hermes` user the agent actually runs as: it
+      # makes the projected ServiceAccount token (mode 0640 root:root) group-
+      # readable by gid 10000, so in-cluster kubectl works. Without it the agent
+      # got "permission denied" reading the token. (fsGroup is not applied to
+      # the hostPath kubeconfigs mounts, so the repo's group ownership is safe.)
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 10000
+      containers:
+        - name: hermes
+          image: nousresearch/hermes-agent:latest
+          # Matches the documented `docker run ... hermes-agent gateway run`.
+          # With HERMES_DASHBOARD=1, the gateway supervises the dashboard too.
+          # --replace clears a stale PID lock left on the persistent /opt/data
+          # volume by a prior pod (Recreate kills the old pod, but its gateway
+          # lockfile survives on the PV); without it the new pod refuses to start.
+          args: ["gateway", "run", "--replace"]
+          ports:
+            - name: api
+              containerPort: 8642
+            - name: dashboard
+              containerPort: 9119
+          env:
+            # --- Model / provider ---
+            - name: HERMES_PROVIDER
+              value: "anthropic"
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: anthropic-api-key
+            # --- Approvals: YOLO mode ---
+            # Bypasses all command-approval prompts so the agent runs commands
+            # without asking. Frozen at process import (injection-resistant).
+            # Hardline-destructive commands (rm -rf /, mkfs, dd to a raw device,
+            # shutdown/reboot, fork bombs, sudo-via-stdin) are still blocked
+            # unconditionally — YOLO can't override those by design.
+            - name: HERMES_YOLO_MODE
+              value: "1"
+            # --- Run/write as root over the hostPath data dir ---
+            - name: HERMES_UID
+              value: "0"
+            - name: HERMES_GID
+              value: "0"
+            # --- OpenAI-compatible API server (8642) ---
+            - name: API_SERVER_ENABLED
+              value: "true"
+            - name: API_SERVER_HOST
+              value: "0.0.0.0"
+            - name: API_SERVER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: api-server-key
+            # --- Dashboard (9119), behind built-in basic auth ---
+            - name: HERMES_DASHBOARD
+              value: "1"
+            - name: HERMES_DASHBOARD_HOST
+              value: "0.0.0.0"
+            - name: HERMES_DASHBOARD_PORT
+              value: "9119"
+            - name: HERMES_DASHBOARD_BASIC_AUTH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: dashboard-basic-auth-username
+            - name: HERMES_DASHBOARD_BASIC_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: dashboard-basic-auth-password
+            - name: HERMES_DASHBOARD_BASIC_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: dashboard-basic-auth-secret
+            # --- Telegram channel (long polling, outbound only) ---
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: telegram-bot-token
+            - name: TELEGRAM_ALLOWED_USERS
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: telegram-allowed-users
+            # --- Slack: NO bot/connector ---
+            # The Slack bot/Socket-Mode connector is fully removed (no
+            # SLACK_BOT_TOKEN / SLACK_APP_TOKEN), so Hermes does not listen to
+            # or act as a Slack bot. Only this USER token remains, purely so the
+            # agent can make Slack Web API calls on the owner's behalf (e.g. via
+            # curl/scripts). It is NOT a platform connector and does not make
+            # Hermes reachable by anyone.
+            - name: SLACK_USER_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: slack-user-token
+            # --- Polymarket GitHub PAT ---
+            # GH_TOKEN is the name gh/git auto-detect for auth; POLYMARKET_GITHUB_PAT
+            # is the same value under an explicit label. Both map to the
+            # `polymarket-github-pat` key in hermes-secrets.
+            - name: GH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: polymarket-github-pat
+            - name: POLYMARKET_GITHUB_PAT
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: polymarket-github-pat
+            # --- Grafana service-account tokens (read-only) ---
+            # Consumed by the grafana-triage skill, one per fleet environment.
+            # The skill's gqenv.sh reads these env vars first, falling back to
+            # ~/.claude/.grafana-token* files. prod = GRAFANA_TOKEN.
+            - name: GRAFANA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: grafana-token
+            - name: GRAFANA_TOKEN_PREPROD
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: grafana-token-preprod
+            - name: GRAFANA_TOKEN_STAGING
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-secrets
+                  key: grafana-token-staging
+          volumeMounts:
+            - name: hermes-data
+              mountPath: /opt/data
+            # Manifests for hermes + gbrain, hostPath'd from the kubeconfigs
+            # repo on server-master so the agent can edit them in place.
+            # Mounted outside /opt/data to keep them off the state PV.
+            - name: kubeconfigs-hermes
+              mountPath: /opt/kubeconfigs/hermes
+            - name: kubeconfigs-gbrain
+              mountPath: /opt/kubeconfigs/gbrain
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8642
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8642
+            initialDelaySeconds: 45
+            periodSeconds: 30
+      volumes:
+        - name: hermes-data
+          persistentVolumeClaim:
+            claimName: hermes-data-pvc
+        # Direct hostPath (not a PV) is fine here: the pod is already pinned
+        # to server-master, which is where the repo checkout lives.
+        - name: kubeconfigs-hermes
+          hostPath:
+            path: /home/prayuj/kubeconfigs/hermes
+            type: Directory
+        - name: kubeconfigs-gbrain
+          hostPath:
+            path: /home/prayuj/kubeconfigs/gbrain
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hermes
+  namespace: hermes
+spec:
+  type: ClusterIP
+  selector:
+    app: hermes
+  ports:
+    - name: api
+      protocol: TCP
+      port: 8642
+      targetPort: 8642
+    - name: dashboard
+      protocol: TCP
+      port: 9119
+      targetPort: 9119

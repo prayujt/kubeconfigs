@@ -1,0 +1,48 @@
+# Fast "recent" Slack backfill — last 3 days, threads ON. Small thread volume,
+# so it finishes in minutes despite Slack's conversations.replies throttle.
+# Replaces the last-3-day day-pages with fully thread+reaction-enriched versions.
+#   kubectl -n gbrain delete job slack-recent-backfill --ignore-not-found
+#   kubectl apply -f slack-recent-backfill-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: slack-recent-backfill
+  namespace: gbrain
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 3600
+  template:
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        kubernetes.io/hostname: server-master
+      containers:
+        - name: slack-recent-backfill
+          image: docker.prayujt.com/gbrain:latest
+          command: ["bun", "/scripts/slack-bridge.ts"]
+          env:
+            - name: GBRAIN_MCP_URL
+              value: "http://gbrain:3131/mcp"
+            - name: BACKFILL_MODE
+              value: "true"
+            - name: FIRST_RUN_LOOKBACK_DAYS
+              value: "3"          # recent only — fast
+            - name: FETCH_THREADS
+              value: "true"
+            - name: THREAD_LOOKBACK_DAYS
+              value: "3"
+            - name: SKIP_THREAD_CHANNELS
+              value: "^alerts-|resolutions-auto|automatic-games|^monitoring|^logs-"
+            - name: SLACK_TOKEN
+              valueFrom:
+                secretKeyRef: { name: gbrain-secrets, key: slack-user-token }
+            - name: GBRAIN_TOKEN
+              valueFrom:
+                secretKeyRef: { name: gbrain-secrets, key: slack-bridge-mcp-token }
+          volumeMounts:
+            - name: script
+              mountPath: /scripts
+      volumes:
+        - name: script
+          configMap:
+            name: slack-bridge-script

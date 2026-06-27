@@ -8,10 +8,18 @@ spec:
     storage: 50Mi
   accessModes:
     - ReadWriteOnce
-  nfs:
-    path: /home/files/.synapse/turn
-    server: 192.168.86.100
+  persistentVolumeReclaimPolicy: Retain
+  local:
+    path: /srv/data/synapse/turn
   storageClassName: turn-server-config
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -1,0 +1,211 @@
+apiVersion: v1
+data:
+  gmail-bridge.ts: |
+    // gmail-bridge.ts — pulls Gmail messages into gbrain via the put_page MCP tool.
+    //
+    // Runs as a k8s CronJob on the gbrain image (Bun). Auth: a Google OAuth client
+    // + refresh token (extracted from openclaw's gogcli keyring) minted into a
+    // short-lived access token each run. One page per message (slug = gmail/<id>),
+    // idempotent; sync state stored as the `system/gmail-sync-cursor` brain page.
+    //
+    // Env:
+    //   GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN
+    //   GBRAIN_MCP_URL / GBRAIN_TOKEN
+    //   FIRST_RUN_LOOKBACK_DAYS   first-sight window (default 2; backfill overrides)
+    //   MAX_MSGS_PER_RUN          safety bound, logged when hit (default 5000)
+    //   BACKFILL_MODE             "true" ignores cursor, uses the full lookback window
+
+    const CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
+    const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
+    const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN!;
+    const MCP_URL = process.env.GBRAIN_MCP_URL!;
+    const MCP_TOKEN = process.env.GBRAIN_TOKEN!;
+    const LOOKBACK_DAYS = Number(process.env.FIRST_RUN_LOOKBACK_DAYS ?? "2");
+    const MAX_MSGS = Number(process.env.MAX_MSGS_PER_RUN ?? "5000");
+    const BACKFILL_MODE = process.env.BACKFILL_MODE === "true";
+    const CURSOR_SLUG = "system/gmail-sync-cursor";
+
+    let mcpId = 0;
+    async function mcp(name: string, args: Record<string, unknown>) {
+      const res = await fetch(MCP_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${MCP_TOKEN}`,
+          "Content-Type": "application/json",
+          Accept: "application/json, text/event-stream",
+        },
+        body: JSON.stringify({ jsonrpc: "2.0", id: ++mcpId, method: "tools/call", params: { name, arguments: args } }),
+      });
+      const text = await res.text();
+      const dataLine = text.split("\n").find((l) => l.startsWith("data: "));
+      return JSON.parse(dataLine ? dataLine.slice(6) : text).result?.content?.[0]?.text as string | undefined;
+    }
+
+    let _token = "";
+    async function accessToken() {
+      if (_token) return _token;
+      const body = new URLSearchParams({
+        client_id: CLIENT_ID, client_secret: CLIENT_SECRET,
+        refresh_token: REFRESH_TOKEN, grant_type: "refresh_token",
+      });
+      const j = await (await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body,
+      })).json();
+      if (!j.access_token) throw new Error(`token mint failed: ${JSON.stringify(j)}`);
+      _token = j.access_token;
+      return _token;
+    }
+
+    async function gmail(path: string) {
+      for (;;) {
+        const res = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me${path}`, {
+          headers: { Authorization: `Bearer ${await accessToken()}` },
+        });
+        if (res.status === 429 || res.status === 403) {
+          const j = await res.json().catch(() => ({}));
+          if (JSON.stringify(j).match(/rateLimit|userRateLimit|quota/i)) {
+            console.error("[gmail] rate limited; waiting 10s"); await new Promise((r) => setTimeout(r, 10000)); continue;
+          }
+          throw new Error(`gmail ${path}: ${res.status} ${JSON.stringify(j)}`);
+        }
+        if (!res.ok) throw new Error(`gmail ${path}: ${res.status} ${await res.text()}`);
+        return res.json();
+      }
+    }
+
+    // list message ids matching q, paginated, capped
+    async function listIds(q: string) {
+      const ids: string[] = [];
+      let pageToken = "";
+      do {
+        const j = await gmail(`/messages?q=${encodeURIComponent(q)}&maxResults=500${pageToken ? `&pageToken=${pageToken}` : ""}`);
+        for (const m of j.messages ?? []) ids.push(m.id);
+        pageToken = j.nextPageToken || "";
+      } while (pageToken && ids.length < MAX_MSGS);
+      return { ids: ids.slice(0, MAX_MSGS), capped: !!pageToken };
+    }
+
+    const b64url = (s: string) => Buffer.from(s.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString("utf8");
+    function extractBody(payload: any): string {
+      if (!payload) return "";
+      if (payload.mimeType === "text/plain" && payload.body?.data) return b64url(payload.body.data);
+      for (const p of payload.parts ?? []) {
+        const t = extractBody(p);
+        if (t) return t;
+      }
+      // fall back to any html part stripped, else nothing
+      if (payload.mimeType === "text/html" && payload.body?.data)
+        return b64url(payload.body.data).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      return "";
+    }
+
+    const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
+
+    async function loadCursor(): Promise<{ after?: number }> {
+      const content = await mcp("get_page", { slug: CURSOR_SLUG, include_deleted: true });
+      if (!content) return {};
+      try {
+        const m = (JSON.parse(content).compiled_truth || "").match(/```json\s*([\s\S]*?)```/);
+        if (m) return JSON.parse(m[1]);
+      } catch { /* first run */ }
+      return {};
+    }
+    async function saveCursor(cur: { after?: number }) {
+      const content = `---\ntype: system\ntitle: Gmail Sync Cursor\n---\nLast-synced Gmail internalDate (unix seconds). Managed by gmail-bridge — do not edit.\n\n` +
+        "```json\n" + JSON.stringify(cur, null, 2) + "\n```\n";
+      await mcp("put_page", { slug: CURSOR_SLUG, content });
+    }
+
+    async function main() {
+      const cur = BACKFILL_MODE ? {} : await loadCursor();
+      const q = cur.after ? `after:${cur.after}` : `newer_than:${LOOKBACK_DAYS}d`;
+      console.error(`[gmail-bridge] query: ${q}${BACKFILL_MODE ? " (BACKFILL)" : ""}`);
+      const { ids, capped } = await listIds(q);
+      console.error(`[gmail-bridge] ${ids.length} messages to fetch`);
+
+      let written = 0, maxInternal = cur.after ? cur.after * 1000 : 0;
+      for (const id of ids) {
+        let msg;
+        try { msg = await gmail(`/messages/${id}?format=full`); }
+        catch (e: any) { console.error(`[gmail-bridge] skip ${id}: ${e.message}`); continue; }
+        const headers: Record<string, string> = {};
+        for (const h of msg.payload?.headers ?? []) headers[h.name.toLowerCase()] = h.value;
+        const subject = headers["subject"] || "(no subject)";
+        const date = new Date(Number(msg.internalDate)).toISOString();
+        const body = extractBody(msg.payload) || msg.snippet || "";
+        const labels = (msg.labelIds ?? []).join(", ");
+        const slug = `gmail/${date.slice(0, 10)}/${slugify(subject)}-${id.slice(-6)}`;
+        const fm = `---\ntype: reference\ntitle: ${JSON.stringify(`Email: ${subject}`.slice(0, 120))}\ntags: [gmail, email]\n---\n`;
+        const content = fm +
+          `# ${subject}\n\n` +
+          `- **From:** ${headers["from"] || "?"}\n- **To:** ${headers["to"] || "?"}\n` +
+          `- **Date:** ${date}\n` + (labels ? `- **Labels:** ${labels}\n` : "") + `\n${body}\n`;
+        await mcp("put_page", { slug, content, source_kind: "webhook", ingested_via: "gmail-bridge" });
+        written++;
+        if (Number(msg.internalDate) > maxInternal) maxInternal = Number(msg.internalDate);
+      }
+
+      if (maxInternal > 0) await saveCursor({ after: Math.floor(maxInternal / 1000) + 1 });
+      console.error(`[gmail-bridge] done: ${written} emails -> pages`);
+      if (capped) console.error(`[gmail-bridge] WARN: hit ${MAX_MSGS}-msg/run cap (remainder next run)`);
+    }
+
+    main().catch((e) => { console.error("[gmail-bridge] FATAL", e); process.exit(1); });
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: gmail-bridge-script
+  namespace: gbrain
+---
+# Gmail -> gbrain bridge. Steady-state cron (master-pinned, amd64 image).
+# Regenerate ConfigMap after editing gmail-bridge.ts:
+#   kubectl create configmap gmail-bridge-script -n gbrain \
+#     --from-file=gmail-bridge.ts --dry-run=client -o yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: gmail-bridge
+  namespace: gbrain
+spec:
+  schedule: "*/10 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  startingDeadlineSeconds: 120
+  jobTemplate:
+    spec:
+      # Auto-delete finished jobs (success or failure) 1 day after they end,
+      # so old failures don't linger. successfulJobsHistoryLimit still caps
+      # kept successes at the latest 1.
+      ttlSecondsAfterFinished: 86400
+      backoffLimit: 1
+      activeDeadlineSeconds: 1800
+      template:
+        spec:
+          restartPolicy: Never
+          nodeSelector:
+            kubernetes.io/hostname: server-master
+          containers:
+            - name: gmail-bridge
+              image: docker.prayujt.com/gbrain:latest
+              command: ["bun", "/scripts/gmail-bridge.ts"]
+              env:
+                - name: GBRAIN_MCP_URL
+                  value: "http://gbrain:3131/mcp"
+                - name: FIRST_RUN_LOOKBACK_DAYS
+                  value: "2"
+                - name: GOOGLE_CLIENT_ID
+                  valueFrom: { secretKeyRef: { name: gbrain-secrets, key: google-client-id } }
+                - name: GOOGLE_CLIENT_SECRET
+                  valueFrom: { secretKeyRef: { name: gbrain-secrets, key: google-client-secret } }
+                - name: GOOGLE_REFRESH_TOKEN
+                  valueFrom: { secretKeyRef: { name: gbrain-secrets, key: google-refresh-token } }
+                - name: GBRAIN_TOKEN
+                  valueFrom: { secretKeyRef: { name: gbrain-secrets, key: gmail-bridge-mcp-token } }
+              volumeMounts:
+                - name: script
+                  mountPath: /scripts
+          volumes:
+            - name: script
+              configMap:
+                name: gmail-bridge-script

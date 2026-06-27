@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hue-control
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hue-control
+  namespace: hue-control
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hue-control
+  template:
+    metadata:
+      labels:
+        app: hue-control
+    spec:
+      # Pin to the remote node and tolerate its taint so it only runs there.
+      nodeSelector:
+        kubernetes.io/hostname: server-worker4
+      tolerations:
+      - key: remote
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+      containers:
+      - name: hue-control
+        image: docker.prayujt.com/hue-control:latest
+        imagePullPolicy: Always
+        env:
+        - name: HUE_BRIDGE_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: hue-control-env
+              key: HUE_BRIDGE_ADDR
+        - name: HUE_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hue-control-env
+              key: HUE_API_TOKEN
+        - name: PORT
+          value: "8080"
+        ports:
+        - containerPort: 8080

@@ -9,10 +9,17 @@ spec:
   accessModes:
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Retain
-  nfs:
+  local:
     path: /srv/music
-    server: 192.168.86.100
   storageClassName: audio-scraper-music
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

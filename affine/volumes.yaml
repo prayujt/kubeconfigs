@@ -8,10 +8,18 @@ spec:
     storage: 1Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/data/affine/config
-    server: 192.168.86.100
   storageClassName: affine-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -23,10 +31,18 @@ spec:
     storage: 2Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/data/affine/storage
-    server: 192.168.86.100
   storageClassName: affine-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -38,10 +54,18 @@ spec:
     storage: 1Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/data/affine/redis
-    server: 192.168.86.100
   storageClassName: affine-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -53,10 +77,18 @@ spec:
     storage: 30Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/data/affine/postgres
-    server: 192.168.86.100
   storageClassName: affine-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

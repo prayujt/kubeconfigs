@@ -8,10 +8,18 @@ spec:
     storage: 100Gi
   accessModes:
     - ReadWriteOnce
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/docker
-    server: 192.168.86.100
   storageClassName: docker-registry
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gbrain
+  namespace: gbrain
+  labels:
+    app: gbrain
+spec:
+  # Strict single writer: GBrain runs continuous sync loops + heavy file IO.
+  # Recreate (never RollingUpdate) so two pods can't overlap on the RWO
+  # volume and split-brain the data dir.
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: gbrain
+  template:
+    metadata:
+      labels:
+        app: gbrain
+    spec:
+      # Pin to server-master: the data PV is a local hostPath on that node.
+      nodeSelector:
+        kubernetes.io/hostname: server-master
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: role
+                    operator: In
+                    values:
+                      - master
+      initContainers:
+        # One-time brain init on first boot (config lands on the PVC).
+        # serve --http fails fast until the brain is initialized.
+        - name: init-brain
+          image: docker.prayujt.com/gbrain:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              if [ ! -f /root/.gbrain/config.json ]; then
+                echo "No brain config found, initializing against Postgres..."
+                gbrain init --url "$DATABASE_URL" --no-embedding
+              else
+                echo "Brain already initialized, skipping."
+              fi
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: gbrain-secrets
+                  key: database-url
+          volumeMounts:
+            - name: gbrain-data
+              mountPath: /root/.gbrain
+      containers:
+        - name: gbrain
+          image: docker.prayujt.com/gbrain:latest
+          # --public-url keeps the OAuth issuer in discovery metadata aligned
+          # with the public host (RFC 8414); required for remote MCP clients.
+          command:
+            - gbrain
+            - serve
+            - --http
+            - --port
+            - "3131"
+            - --bind
+            - 0.0.0.0
+            - --public-url
+            - https://gbrain.prayujt.com
+          ports:
+            - containerPort: 3131
+          env:
+            # gbrain serve --http fails fast on PGLite; it requires a real
+            # PostgreSQL (with pgvector) for hashed tokens + vector embeddings.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: gbrain-secrets
+                  key: database-url
+            # OAuth endpoints reject all cross-origin requests unless set.
+            - name: GBRAIN_HTTP_CORS_ORIGIN
+              value: "https://gbrain.prayujt.com"
+            # Anthropic API key — drives gbrain's native anthropic recipe
+            # (x-api-key auth, prompt caching, native subagent tool loop).
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: gbrain-secrets
+                  key: anthropic-api-key
+          volumeMounts:
+            - name: gbrain-data
+              mountPath: /root/.gbrain
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3131
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3131
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: gbrain-data
+          persistentVolumeClaim:
+            claimName: gbrain-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gbrain
+  namespace: gbrain
+spec:
+  type: ClusterIP
+  selector:
+    app: gbrain
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3131
+      targetPort: 3131

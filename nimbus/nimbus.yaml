@@ -14,11 +14,18 @@ spec:
     metadata:
       labels:
         app: nimbus
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
     spec:
       serviceAccountName: nimbus-sa
+      nodeSelector:
+        kubernetes.io/hostname: server-master
       containers:
         - name: nimbus
-          image: docker.prayujt.com/nimbus
+          image: docker.prayujt.com/nimbus:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
@@ -40,7 +47,7 @@ spec:
             - name: DB_PORT
               value: "5432"
             - name: NIMBUS_STORAGE_CLASS
-              value: "nfs-client"
+              value: "local"
           args:
             - "server"
 ---

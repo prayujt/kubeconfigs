@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hermes-ingress
+  namespace: hermes
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Dashboard can use long-lived / streaming connections for tool output.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - hermes.prayujt.com
+      secretName: hermes-prayujt-certs
+  rules:
+    - host: hermes.prayujt.com
+      http:
+        paths:
+          # Dashboard (built-in basic auth) is the human web UI.
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hermes
+                port:
+                  number: 9119

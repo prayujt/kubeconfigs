@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: registry-prune
+  namespace: docker-registry
+spec:
+  # Weekly, Sunday 04:00 (cluster time)
+  schedule: "0 4 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          # Local PV lives on server-master; pin the job there to mount it.
+          nodeSelector:
+            kubernetes.io/hostname: server-master
+          # Step 1: prune old tags + empty repos (runs to completion first).
+          initContainers:
+          - name: prune-tags
+            image: python:3-slim
+            command: ["python", "/scripts/prune.py"]
+            env:
+            - name: MAX_AGE_DAYS
+              value: "30"
+            - name: MIN_KEEP
+              value: "3"
+            - name: DRY_RUN
+              value: "false"
+            volumeMounts:
+            - name: registry-storage
+              mountPath: /var/lib/registry
+            - name: prune-script
+              mountPath: /scripts
+              readOnly: true
+          # Step 2: reclaim blobs that no manifest references at all.
+          # NOTE: --delete-untagged is deliberately OMITTED. It deletes the
+          # per-arch child manifests of multi-arch image indexes (they have no
+          # direct tag), which corrupts multi-arch images. See distribution#3178.
+          containers:
+          - name: garbage-collect
+            image: registry:2
+            command:
+            - /bin/registry
+            - garbage-collect
+            - /etc/docker/registry/config.yml
+            volumeMounts:
+            - name: registry-storage
+              mountPath: /var/lib/registry
+          volumes:
+          - name: registry-storage
+            persistentVolumeClaim:
+              claimName: registry-pvc
+          - name: prune-script
+            configMap:
+              name: registry-prune-script

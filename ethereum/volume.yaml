@@ -8,10 +8,18 @@ spec:
     storage: 150Gi
   accessModes:
     - ReadWriteMany
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/ethereum/geth
-    server: 192.168.86.100
   storageClassName: ethereum-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -23,10 +31,18 @@ spec:
     storage: 50Gi
   accessModes:
     - ReadWriteMany
-  nfs:
+  persistentVolumeReclaimPolicy: Retain
+  local:
     path: /srv/ethereum/lighthouse
-    server: 192.168.86.100
   storageClassName: ethereum-data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

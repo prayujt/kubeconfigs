@@ -1,0 +1,41 @@
+# Local block-style storage pinned to server-master (same pattern as gbrain).
+# Hermes keeps ALL state — config, .env, SQLite session history, skills — in a
+# single data dir (/opt/data). No Postgres needed, so just one hostPath PV at
+# /srv/hermes/data, served with the cluster's `local-storage` class. RWO; node
+# affinity keeps the pod on the node that owns the disk.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hermes-data-pv
+spec:
+  capacity:
+    storage: 40Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /srv/hermes/data
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-data-pvc
+  namespace: hermes
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeName: hermes-data-pv
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 40Gi

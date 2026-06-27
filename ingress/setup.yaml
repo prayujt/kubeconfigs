@@ -312,7 +312,13 @@ subjects:
   namespace: ingress-nginx
 ---
 apiVersion: v1
-data: null
+data:
+  # Allow nginx.ingress.kubernetes.io/configuration-snippet (e.g. nimbus SPA
+  # fallback: error_page 404 =200 /index.html). Both keys are required on
+  # ingress-nginx v1.9+: snippets are gated by allow-snippet-annotations AND
+  # classified Critical risk, so annotations-risk-level must be Critical too.
+  allow-snippet-annotations: "true"
+  annotations-risk-level: "Critical"
 kind: ConfigMap
 metadata:
   labels:

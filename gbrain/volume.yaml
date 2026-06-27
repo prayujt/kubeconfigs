@@ -1,0 +1,77 @@
+# Local block-style storage pinned to server-master.
+# Both PVs are hostPath on server-master under /srv/gbrain, served with the
+# cluster's `local-storage` class (same pattern as openclaw host-home-pv).
+# RWO as required; node affinity keeps the pods on the node that owns the disk.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gbrain-data-pv
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /srv/gbrain/data
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gbrain-data-pvc
+  namespace: gbrain
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeName: gbrain-data-pv
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gbrain-psql-pv
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  hostPath:
+    path: /srv/gbrain/psql
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - server-master
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gbrain-psql-pvc
+  namespace: gbrain
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeName: gbrain-psql-pv
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 10Gi
